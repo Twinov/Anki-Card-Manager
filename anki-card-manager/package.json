@@ -40,6 +40,8 @@
     "eslint-plugin-svelte3": "^3.2.0",
     "sirv-cli": "^1.0.0",
     "smelte": "^1.1.6",
+    "sql.js": "^1.5.0",
+    "svelte-routing": "^1.6.0",
     "tailwindcss": "^2.2.4"
   }
 }
