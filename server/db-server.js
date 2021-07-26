@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 app.post('/api/sentence_for_character', (req, res) => {
-  const sql = `SELECT * FROM examples WHERE traditional LIKE '%${req.body.character}%' LIMIT 5`
+  const sql = `SELECT * FROM examples WHERE simplified LIKE '%${req.body.character}%' LIMIT 5`
   db.all(sql, [], (err, rows) => {
     if (err) {
       res.status(400).json({ error: err.message })
