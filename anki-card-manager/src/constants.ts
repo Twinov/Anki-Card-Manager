@@ -1,0 +1,1 @@
+export const APIENDPOINT = 'localhost:3003/api'

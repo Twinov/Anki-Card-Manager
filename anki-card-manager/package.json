@@ -6,7 +6,7 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "lint": "./node_modules/.bin/eslint ./src/* --fix",
-    "start": "sirv public --no-clear",
+    "start": "sirv public --no-clear -s",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
