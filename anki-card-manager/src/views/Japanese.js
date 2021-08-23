@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Button } from 'antd'
+import { Button, List } from 'antd'
+
+import { APIENDPOINT } from '../constants'
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -10,11 +12,28 @@ const Wrapper = styled.div`
 `
 
 const Japanese = () => {
+  const [pendingCards, setPendingCards] = useState([])
+
+  useEffect(() => {
+    console.log(`${APIENDPOINT}/pending_card_names`)
+    fetch(`${APIENDPOINT}/pending_card_names`)
+      .then(response => response.json())
+      .then(res => setPendingCards(res['cardNames']))
+  }, [])
+
   return (
     <Wrapper>
-      <Button type='primary' shape='round' size='large' style={{ width: '300px', marginTop: '100px' }}>
-        Placeholder
-      </Button>
+      <List
+        header={<p style={{ textAlign: 'center' }}>Pending Anki Cards</p>}
+        bordered
+        dataSource={pendingCards}
+        renderItem={(item) => (
+          <List.Item>
+            {item}
+          </List.Item>
+        )}
+      />
+      <Button onClick={() => console.log(pendingCards)}>lol</Button>
     </Wrapper>
   )
 }

@@ -1,6 +1,9 @@
 {
   "dependencies": {
     "express": "^4.17.1",
-    "sqlite3": "^5.0.2"
+    "express-winston": "^4.1.0",
+    "fs": "^0.0.1-security",
+    "sqlite3": "^5.0.2",
+    "winston": "^3.3.3"
   }
 }
