@@ -5,4 +5,4 @@ function define(name, value) {
   })
 }
 
-define('ANKICARDSLOCATION', 'path/to/cards')
+define('ANKICARDSLOCATION', '/path/to/cards')
