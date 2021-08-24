@@ -37,18 +37,39 @@ const CardInput = styled(TextArea)`
 const CardButtons = styled.div`
   display: flex;
   flex-direction: row;
+  justify-content: center;
   gap: 5px;
 `
 
 const PendingCardItem = ({ cardLocation }) => {
   const [inputText, setInputText] = useState('')
+  const [createdCards, setCreatedCards] = useState([])
 
   return (
     <PendingCardWrapper>
       <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
       <CardActions>
         <CardInput rows={6} autoSize={true} value={inputText} onChange={e => setInputText(e.target.value)} />
-        <p>{inputText}</p>
+        <p>Parsed Text: [{inputText}]</p>
+        <CardButtons>
+          <Button onClick={() => {
+            console.log(inputText)
+            fetch(`${APIENDPOINT}/find_note_wrapper`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                'query': inputText
+              })
+            })
+              .then(response => response.json())
+              .then(response => setCreatedCards(response.result))
+          }}>
+            Scan for created cards
+          </Button>
+          <p>Found Card IDs: {JSON.stringify(createdCards)}</p>
+        </CardButtons>
         <CardButtons>
           <Button type='primary'>Add Pic to Card</Button>
           <Button>Move to Done</Button>

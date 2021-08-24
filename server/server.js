@@ -4,6 +4,7 @@ const expressWinston = require('express-winston')
 const { spawn } = require('child_process')
 const fs = require('fs')
 const sqlite3 = require('sqlite3').verbose()
+const fetch = require('node-fetch')
 
 const constants = require('./constants')
 
@@ -75,6 +76,22 @@ app.get('/api/pending_card_names', (req, res) => {
   })
 })
 
+app.post('/api/find_note_wrapper', (req, res) => {
+  console.log(`getting note IDs for query: ${req.body.query}`)
+  fetch(constants.ANKICONNECTENDPOINT, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'findNotes',
+      version: 6,
+      params: {
+        query: req.body.query,
+      },
+    }),
+  })
+    .then(response => response.json())
+    .then(response => res.json(response))
+})
+
 app.listen(port, () => {
-  console.log(`Sentence database API listening on localhost port ${port}`)
+  console.log(`Anki Card Manager backend listening on localhost port ${port}`)
 })
