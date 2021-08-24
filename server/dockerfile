@@ -1,0 +1,12 @@
+From node:12.13.0
+
+WORKDIR /usr/src/ankicardmanagerbackend
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3003
+CMD [ "node", "server.js"]
