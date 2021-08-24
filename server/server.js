@@ -26,6 +26,8 @@ app.use(
   })
 )
 
+app.use('/api/static', express.static(constants.ANKICARDSLOCATION))
+
 app.post('/api/sentence_for_character', (req, res) => {
   const sql = `SELECT * FROM examples WHERE simplified LIKE '%${req.body.character}%' LIMIT 5`
   db.all(sql, [], (err, rows) => {
