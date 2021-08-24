@@ -88,8 +88,37 @@ app.post('/api/find_note_wrapper', (req, res) => {
       },
     }),
   })
-    .then(response => response.json())
-    .then(response => res.json(response))
+    .then((response) => response.json())
+    .then((response) => res.json(response))
+})
+
+app.post('/api/add_image_to_card', (req, res) => {
+  console.log(`Adding image ${req.body.imageLocation} to card ${req.body.cardID}`)
+
+  fetch(constants.ANKICONNECTENDPOINT, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'updateNoteFields',
+      version: 6,
+      params: {
+        note: {
+          id: req.body.cardID,
+          fields: {
+            Source: '',
+          },
+          picture: [
+            {
+              url: `http://localhost:${port}/api/static/${req.body.imageLocation}`,
+              filename: req.body.imageLocation,
+              fields: ['Source'],
+            },
+          ],
+        },
+      },
+    }),
+  })
+    .then((response) => response.json())
+    .then((response) => res.json(response))
 })
 
 app.listen(port, () => {

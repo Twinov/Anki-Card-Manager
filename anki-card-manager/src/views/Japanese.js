@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Button, Image, Input, } from 'antd'
+import { Button, Image, Input, notification } from 'antd'
 import PropTypes from 'prop-types'
 
 import { APIENDPOINT } from '../constants'
@@ -53,7 +53,6 @@ const PendingCardItem = ({ cardLocation }) => {
         <p>Parsed Text: [{inputText}]</p>
         <CardButtons>
           <Button onClick={() => {
-            console.log(inputText)
             fetch(`${APIENDPOINT}/find_note_wrapper`, {
               method: 'POST',
               headers: {
@@ -71,7 +70,39 @@ const PendingCardItem = ({ cardLocation }) => {
           <p>Found Card IDs: {JSON.stringify(createdCards)}</p>
         </CardButtons>
         <CardButtons>
-          <Button type='primary'>Add Pic to Card</Button>
+          <Button type='primary' onClick={() => {
+            if (createdCards.length == 0)
+              notification.open({
+                message: 'Add Image Status',
+                description: 'No cards to add pictures to!',
+              })
+            createdCards.forEach((id) => {
+              fetch(`${APIENDPOINT}/add_image_to_card`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  cardID: id,
+                  imageLocation: cardLocation
+                }),
+              })
+                .then((response) => response.json())
+                .then((response) => {
+                  if (response.error == null) 
+                    notification.open({
+                      message: 'Add Image Status',
+                      description: 'Success :)',
+                    })
+                  else
+                    notification.open({
+                      message: 'Add Image Status',
+                      description: response.error,
+                    })
+                })
+            })}}>
+            Add Pic to Card
+          </Button>
           <Button>Move to Done</Button>
           <Button danger>Delete Image</Button>
         </CardButtons>
