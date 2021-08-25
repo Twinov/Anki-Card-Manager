@@ -45,6 +45,83 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
   const [inputText, setInputText] = useState('')
   const [createdCards, setCreatedCards] = useState([])
 
+  const scanForIDs = (query) => {
+    fetch(`${APIENDPOINT}/find_note_wrapper`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: query,
+      }),
+    })
+      .then((response) => response.json())
+      .then((response) => setCreatedCards(response.result))
+  }
+
+  const addImageToCard = () => {
+    if (createdCards.length == 0)
+      notification.open({
+        message: 'Add Image Status',
+        description: 'No cards to add pictures to!',
+      })
+    createdCards.forEach((id) => {
+      fetch(`${APIENDPOINT}/add_image_to_card`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cardID: id,
+          imageLocation: cardLocation,
+        }),
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          if (response.error == null)
+            notification.open({
+              message: 'Add Image Status',
+              description: 'Success :)',
+            })
+          else
+            notification.open({
+              message: 'Add Image Status',
+              description: response.error,
+            })
+        })
+    })
+  }
+
+  const deleteImage = () => {
+    fetch(`${APIENDPOINT}/delete_image`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageLocation: cardLocation,
+      }),
+    })
+      .then((response) => response.json)
+      .then((res) => {
+        if (res.status == 200) {
+          notification.open({
+            message: 'Delete Image Status',
+            description: 'Success :)',
+          })
+          reloadCards()
+        } else {
+          notification.open({
+            message: 'Delete Image Status',
+            description: 'failure (maybe)?',
+          })
+          reloadCards()
+        }
+      })
+  }
+
+  useEffect(() => scanForIDs(cardLocation), [])
+
   return (
     <PendingCardWrapper>
       <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
@@ -52,95 +129,15 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
         <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
         <p>Parsed Text: [{inputText}]</p>
         <CardButtons>
-          <Button
-            onClick={() => {
-              fetch(`${APIENDPOINT}/find_note_wrapper`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  query: inputText,
-                }),
-              })
-                .then((response) => response.json())
-                .then((response) => setCreatedCards(response.result))
-            }}
-          >
-            Scan for created cards
-          </Button>
+          <Button onClick={() => scanForIDs(inputText)}>Scan for created cards</Button>
           <p>Found Card IDs: {JSON.stringify(createdCards)}</p>
         </CardButtons>
         <CardButtons>
-          <Button
-            type='primary'
-            onClick={() => {
-              if (createdCards.length == 0)
-                notification.open({
-                  message: 'Add Image Status',
-                  description: 'No cards to add pictures to!',
-                })
-              createdCards.forEach((id) => {
-                fetch(`${APIENDPOINT}/add_image_to_card`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    cardID: id,
-                    imageLocation: cardLocation,
-                  }),
-                })
-                  .then((response) => response.json())
-                  .then((response) => {
-                    if (response.error == null)
-                      notification.open({
-                        message: 'Add Image Status',
-                        description: 'Success :)',
-                      })
-                    else
-                      notification.open({
-                        message: 'Add Image Status',
-                        description: response.error,
-                      })
-                  })
-              })
-            }}
-          >
+          <Button type='primary' onClick={() => addImageToCard()}>
             Add Pic to Card
           </Button>
           <Button>Move to Done</Button>
-          <Button
-            danger
-            onClick={() => {
-              fetch(`${APIENDPOINT}/delete_image`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  imageLocation: cardLocation,
-                }),
-              })
-                .then((response) => response.json)
-                .then((res) => {
-                  console.log(res)
-                  if (res.status == 200) {
-                    notification.open({
-                      message: 'Delete Image Status',
-                      description: 'Success :)',
-                    })
-                    reloadCards()
-                  } else {
-                    notification.open({
-                      message: 'Delete Image Status',
-                      description: 'failure (maybe)?',
-                    })
-                    reloadCards()
-                  }
-                })
-            }}
-          >
+          <Button danger onClick={() => deleteImage()}>
             Delete Image
           </Button>
         </CardButtons>
