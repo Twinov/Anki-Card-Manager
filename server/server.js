@@ -76,6 +76,18 @@ app.get('/api/pending_card_names', (req, res) => {
   })
 })
 
+app.post('/api/delete_image', (req, res) => {
+  console.log(`deleting image ${req.body.imageLocation}`)
+  try {
+    fs.unlinkSync(`${constants.ANKICARDSLOCATION}${req.body.imageLocation}`)
+    res.json({ status: 'success' })
+    console.log('here')
+  } catch (error) {
+    console.log(error)
+    res.json({ status: 'failure' })
+  }
+})
+
 app.post('/api/find_note_wrapper', (req, res) => {
   console.log(`getting note IDs for query: ${req.body.query}`)
   fetch(constants.ANKICONNECTENDPOINT, {

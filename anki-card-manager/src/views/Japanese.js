@@ -41,7 +41,7 @@ const CardButtons = styled.div`
   gap: 5px;
 `
 
-const PendingCardItem = ({ cardLocation }) => {
+const PendingCardItem = ({ cardLocation, reloadCards }) => {
   const [inputText, setInputText] = useState('')
   const [createdCards, setCreatedCards] = useState([])
 
@@ -110,7 +110,39 @@ const PendingCardItem = ({ cardLocation }) => {
             Add Pic to Card
           </Button>
           <Button>Move to Done</Button>
-          <Button danger>Delete Image</Button>
+          <Button
+            danger
+            onClick={() => {
+              fetch(`${APIENDPOINT}/delete_image`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  imageLocation: cardLocation,
+                }),
+              })
+                .then((response) => response.json)
+                .then((res) => {
+                  console.log(res)
+                  if (res.status == 200) {
+                    notification.open({
+                      message: 'Delete Image Status',
+                      description: 'Success :)',
+                    })
+                    reloadCards()
+                  } else {
+                    notification.open({
+                      message: 'Delete Image Status',
+                      description: 'failure (maybe)?',
+                    })
+                    reloadCards()
+                  }
+                })
+            }}
+          >
+            Delete Image
+          </Button>
         </CardButtons>
       </CardActions>
     </PendingCardWrapper>
@@ -118,10 +150,17 @@ const PendingCardItem = ({ cardLocation }) => {
 }
 PendingCardItem.propTypes = {
   cardLocation: PropTypes.string.isRequired,
+  reloadCards: PropTypes.func.isRequired,
 }
 
 const Japanese = () => {
   const [pendingCards, setPendingCards] = useState([])
+
+  const reloadCards = () => {
+    fetch(`${APIENDPOINT}/pending_card_names`)
+      .then((response) => response.json())
+      .then((res) => setPendingCards(res['cardNames']))
+  }
 
   useEffect(() => {
     fetch(`${APIENDPOINT}/pending_card_names`)
@@ -134,7 +173,7 @@ const Japanese = () => {
       {pendingCards.map((pendingCard) => {
         return (
           <React.Fragment key={pendingCard}>
-            <PendingCardItem cardLocation={pendingCard} />
+            <PendingCardItem cardLocation={pendingCard} reloadCards={reloadCards} />
           </React.Fragment>
         )
       })}
