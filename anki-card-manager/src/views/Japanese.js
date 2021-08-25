@@ -49,58 +49,64 @@ const PendingCardItem = ({ cardLocation }) => {
     <PendingCardWrapper>
       <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
       <CardActions>
-        <CardInput rows={6} autoSize={true} value={inputText} onChange={e => setInputText(e.target.value)} />
+        <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
         <p>Parsed Text: [{inputText}]</p>
         <CardButtons>
-          <Button onClick={() => {
-            fetch(`${APIENDPOINT}/find_note_wrapper`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                'query': inputText
-              })
-            })
-              .then(response => response.json())
-              .then(response => setCreatedCards(response.result))
-          }}>
-            Scan for created cards
-          </Button>
-          <p>Found Card IDs: {JSON.stringify(createdCards)}</p>
-        </CardButtons>
-        <CardButtons>
-          <Button type='primary' onClick={() => {
-            if (createdCards.length == 0)
-              notification.open({
-                message: 'Add Image Status',
-                description: 'No cards to add pictures to!',
-              })
-            createdCards.forEach((id) => {
-              fetch(`${APIENDPOINT}/add_image_to_card`, {
+          <Button
+            onClick={() => {
+              fetch(`${APIENDPOINT}/find_note_wrapper`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                  cardID: id,
-                  imageLocation: cardLocation
+                  query: inputText,
                 }),
               })
                 .then((response) => response.json())
-                .then((response) => {
-                  if (response.error == null) 
-                    notification.open({
-                      message: 'Add Image Status',
-                      description: 'Success :)',
-                    })
-                  else
-                    notification.open({
-                      message: 'Add Image Status',
-                      description: response.error,
-                    })
+                .then((response) => setCreatedCards(response.result))
+            }}
+          >
+            Scan for created cards
+          </Button>
+          <p>Found Card IDs: {JSON.stringify(createdCards)}</p>
+        </CardButtons>
+        <CardButtons>
+          <Button
+            type='primary'
+            onClick={() => {
+              if (createdCards.length == 0)
+                notification.open({
+                  message: 'Add Image Status',
+                  description: 'No cards to add pictures to!',
                 })
-            })}}>
+              createdCards.forEach((id) => {
+                fetch(`${APIENDPOINT}/add_image_to_card`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    cardID: id,
+                    imageLocation: cardLocation,
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((response) => {
+                    if (response.error == null)
+                      notification.open({
+                        message: 'Add Image Status',
+                        description: 'Success :)',
+                      })
+                    else
+                      notification.open({
+                        message: 'Add Image Status',
+                        description: response.error,
+                      })
+                  })
+              })
+            }}
+          >
             Add Pic to Card
           </Button>
           <Button>Move to Done</Button>
@@ -111,7 +117,7 @@ const PendingCardItem = ({ cardLocation }) => {
   )
 }
 PendingCardItem.propTypes = {
-  cardLocation: PropTypes.string.isRequired
+  cardLocation: PropTypes.string.isRequired,
 }
 
 const Japanese = () => {
@@ -119,13 +125,13 @@ const Japanese = () => {
 
   useEffect(() => {
     fetch(`${APIENDPOINT}/pending_card_names`)
-      .then(response => response.json())
-      .then(res => setPendingCards(res['cardNames']))
+      .then((response) => response.json())
+      .then((res) => setPendingCards(res['cardNames']))
   }, [])
 
   return (
     <Wrapper>
-      {pendingCards.map(pendingCard => {
+      {pendingCards.map((pendingCard) => {
         return (
           <React.Fragment key={pendingCard}>
             <PendingCardItem cardLocation={pendingCard} />
