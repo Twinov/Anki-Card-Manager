@@ -3,6 +3,7 @@ const winston = require('winston')
 const expressWinston = require('express-winston')
 const { spawn } = require('child_process')
 const fs = require('fs')
+const mv = require('mv')
 const sqlite3 = require('sqlite3').verbose()
 const fetch = require('node-fetch')
 
@@ -83,7 +84,24 @@ app.post('/api/delete_image', (req, res) => {
   try {
     fs.unlinkSync(`${constants.ANKICARDSLOCATION}${req.body.imageLocation}`)
     res.json({ status: 'success' })
-    console.log('here')
+  } catch (error) {
+    console.log(error)
+    res.json({ status: 'failure' })
+  }
+})
+
+app.post('/api/move_image_to_done', (req, res) => {
+  console.log(`moving image ${req.body.imageLocation} to done folder`)
+  try {
+    const oldPath = `${constants.ANKICARDSLOCATION}${req.body.imageLocation}`
+    const newPath = `${constants.ANKIDONECARDSLOCATION}${req.body.imageLocation}`
+    mv(oldPath, newPath, {clobber: false}, function (err) {
+      if (err) {
+        console.log(err)
+      } else {
+        res.json({ status: 'success' })
+      }
+    })
   } catch (error) {
     console.log(error)
     res.json({ status: 'failure' })

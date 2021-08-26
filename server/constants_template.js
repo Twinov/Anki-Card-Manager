@@ -5,5 +5,6 @@ function define(name, value) {
   })
 }
 
-define('ANKICARDSLOCATION', '/path/to/cards')
+define('ANKICARDSLOCATION', '/path/to/cards/')
+define('ANKIDONECARDSLOCATION', '/path/to/done_cards/')
 define('ANKICONNECTAPIENDPOINT', 'http://localhost:8765')

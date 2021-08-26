@@ -129,11 +129,46 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
         } else {
           notification.open({
             message: 'Delete Image Status',
-            description: 'failure (maybe)?',
+            description: 'done',
           })
           reloadCards()
         }
       })
+  }
+
+  const doneWithImage = () => {
+    if (createdCards.length === 0) {
+      notification.open({
+        message: 'Move Image Status',
+        description: 'Warning: No card IDs for the current image.',
+      })
+    } else {
+      fetch(`${APIENDPOINT}/move_image_to_done`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageLocation: cardLocation,
+        }),
+      })
+        .then((response) => response.json)
+        .then((res) => {
+          if (res.status == 200) {
+            notification.open({
+              message: 'Move Image Status',
+              description: 'Success :)',
+            })
+            reloadCards()
+          } else {
+            notification.open({
+              message: 'Move Image Status',
+              description: 'done',
+            })
+            reloadCards()
+          }
+        })
+    }
   }
 
   useEffect(() => scanForIDs(cardLocation), [])
@@ -153,7 +188,7 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
           <Button type='primary' onClick={() => addImageToCard()}>
             Add Pic to Card
           </Button>
-          <Button>Move to Done</Button>
+          <Button onClick={() => doneWithImage()}>Move to Done</Button>
           <Button danger onClick={() => deleteImage()}>
             Delete Image
           </Button>
