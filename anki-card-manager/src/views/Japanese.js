@@ -68,7 +68,7 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        cardIDs: createdCards,
+        cardIDs: JSON.stringify(createdCards),
       }),
     })
       .then((response) => response.json())
