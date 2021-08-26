@@ -20,16 +20,17 @@ const port = 3003
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(
-  expressWinston.logger({
-    transports: [new winston.transports.Console()],
-    format: winston.format.combine(winston.format.colorize(), winston.format.json()),
-  })
-)
+// app.use(
+//   expressWinston.logger({
+//     transports: [new winston.transports.Console()],
+//     format: winston.format.combine(winston.format.colorize(), winston.format.json()),
+//   })
+// )
 
 app.use('/api/static', express.static(constants.ANKICARDSLOCATION))
 
 app.post('/api/sentence_for_character', (req, res) => {
+  console.log(`getting sentences for ${req.body.character}`)
   const sql = `SELECT * FROM examples WHERE simplified LIKE '%${req.body.character}%' LIMIT 5`
   db.all(sql, [], (err, rows) => {
     if (err) {
@@ -50,6 +51,7 @@ app.post('/api/sentence_for_character', (req, res) => {
 })
 
 app.post('/api/mass_sentence_add', (req, res) => {
+  console.log('mass adding Chinese example sentences')
   const python = spawn('python', ['mass_add_sentences.py'])
   python.stdout.on('data', (data) => {
     console.log(data.toString())
