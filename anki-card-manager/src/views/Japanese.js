@@ -60,8 +60,23 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
       .then((response) => setCreatedCards(response.result))
   }
 
+  const findInfo = () => {
+    if (createdCards.length === 0) return
+    fetch(`${APIENDPOINT}/note_info_wrapper`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cardIDs: createdCards,
+      }),
+    })
+      .then((response) => response.json())
+      .then((response) => setInputText(response['result'][0]['fields']['Sentence']['value']))
+  }
+
   const addImageToCard = () => {
-    if (createdCards.length == 0)
+    if (createdCards.length === 0)
       notification.open({
         message: 'Add Image Status',
         description: 'No cards to add pictures to!',
@@ -122,6 +137,7 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
   }
 
   useEffect(() => scanForIDs(cardLocation), [])
+  useEffect(() => findInfo(), [createdCards])
 
   return (
     <PendingCardWrapper>

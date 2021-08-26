@@ -104,6 +104,22 @@ app.post('/api/find_note_wrapper', (req, res) => {
     .then((response) => res.json(response))
 })
 
+app.post('/api/note_info_wrapper', (req, res) => {
+  console.log(`getting note information for note IDs: ${req.body.cardIDs}`)
+  fetch(constants.ANKICONNECTENDPOINT, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'notesInfo',
+      version: 6,
+      params: {
+        notes: JSON.parse(req.body.cardIDs)
+      },
+    }),
+  })
+    .then((response) => response.json())
+    .then((response) => res.json(response))
+})
+
 app.post('/api/add_image_to_card', (req, res) => {
   console.log(`Adding image ${req.body.imageLocation} to card ${req.body.cardID}`)
 
