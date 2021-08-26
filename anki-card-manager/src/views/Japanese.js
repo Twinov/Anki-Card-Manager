@@ -27,6 +27,7 @@ const CardImage = styled(Image)`
 const CardActions = styled.div`
   display: flex;
   flex-direction: column;
+  max-width: min-content;
 `
 
 const CardInput = styled(TextArea)`
@@ -130,7 +131,7 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
         <p>Parsed Text: [{inputText}]</p>
         <CardButtons>
           <Button onClick={() => scanForIDs(inputText)}>Scan for created cards</Button>
-          <p>Found Card IDs: {JSON.stringify(createdCards)}</p>
+          <p>Found Card IDs: {JSON.stringify(createdCards).split(',').join(', ')}</p>
         </CardButtons>
         <CardButtons>
           <Button type='primary' onClick={() => addImageToCard()}>
