@@ -29,6 +29,7 @@ app.use(express.json())
 // )
 
 app.use('/api/static', express.static(constants.ANKICARDSLOCATION))
+app.use('/api/static', express.static('./assets/'))
 
 app.post('/api/sentence_for_character', (req, res) => {
   console.log(`getting sentences for ${req.body.character}`)

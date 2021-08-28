@@ -4,6 +4,7 @@ import { Button, Image, Input, notification } from 'antd'
 import PropTypes from 'prop-types'
 
 import { APIENDPOINT } from '../constants'
+import KanjiRecognition from './KanjiRecognition'
 
 const { TextArea } = Input
 
@@ -218,15 +219,18 @@ const Japanese = () => {
   }, [])
 
   return (
-    <Wrapper>
-      {pendingCards.map((pendingCard) => {
-        return (
-          <React.Fragment key={pendingCard}>
-            <PendingCardItem cardLocation={pendingCard} reloadCards={reloadCards} />
-          </React.Fragment>
-        )
-      })}
-    </Wrapper>
+    <>
+      <KanjiRecognition />
+      <Wrapper>
+        {pendingCards.map((pendingCard) => {
+          return (
+            <React.Fragment key={pendingCard}>
+              <PendingCardItem cardLocation={pendingCard} reloadCards={reloadCards} />
+            </React.Fragment>
+          )
+        })}
+      </Wrapper>
+    </>
   )
 }
 
