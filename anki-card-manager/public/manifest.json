@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Anki Card Manager",
+  "name": "App for facilitating Anki card creation",
   "icons": [
     {
       "src": "favicon.ico",
