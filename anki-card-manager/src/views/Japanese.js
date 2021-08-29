@@ -8,6 +8,24 @@ import KanjiRecognition from './KanjiRecognition'
 
 const { TextArea } = Input
 
+const Fab = styled.button`
+  position: fixed;
+  z-index: 15;
+  cursor: pointer;
+  background-color: #ffc0cb;
+  width: 100px;
+  height: 100px;
+  border-radius: 100%;
+  background: #ffc0cb;
+  border: none;
+  outline: none;
+  right: 50px;
+  bottom: 50px;
+  color: #fff;
+  font-size: 36px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+`
+
 const Wrapper = styled.div`
   height: 100vh;
   display: flex;
@@ -39,11 +57,11 @@ const CardInput = styled(TextArea)`
 const CardButtons = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  align-items: center;
   gap: 5px;
 `
 
-const PendingCardItem = ({ cardLocation, reloadCards }) => {
+const PendingCardItem = ({ batchOCR, cardLocation, reloadCards }) => {
   const [inputText, setInputText] = useState('')
   const [createdCards, setCreatedCards] = useState([])
 
@@ -74,6 +92,22 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
     })
       .then((response) => response.json())
       .then((response) => setInputText(response['result'][0]['fields']['Sentence']['value']))
+  }
+
+  const ocrImage = () => {
+    if (batchOCR && inputText.length === 0) {
+      fetch(`${APIENDPOINT}/ocr_image`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageLocation: cardLocation,
+        }),
+      })
+        .then((response) => response.json())
+        .then((response) => setInputText(response['result']))
+    }
   }
 
   const addImageToCard = () => {
@@ -173,6 +207,7 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
   }
 
   useEffect(() => scanForIDs(cardLocation), [])
+  useEffect(() => ocrImage(), [batchOCR])
   useEffect(() => findInfo(), [createdCards])
 
   return (
@@ -180,7 +215,10 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
       <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
       <CardActions>
         <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
-        <p>Parsed Text: [{inputText}]</p>
+        <CardButtons>
+          <Button onClick={() => ocrImage(cardLocation)}>Run OCR</Button>
+          <p>Parsed Text: [{inputText}]</p>
+        </CardButtons>
         <CardButtons>
           <Button onClick={() => scanForIDs(inputText)}>Scan for created cards</Button>
           <p>Found Card IDs: {JSON.stringify(createdCards).split(',').join(', ')}</p>
@@ -199,12 +237,14 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
   )
 }
 PendingCardItem.propTypes = {
+  batchOCR: PropTypes.bool.isRequired,
   cardLocation: PropTypes.string.isRequired,
   reloadCards: PropTypes.func.isRequired,
 }
 
 const Japanese = () => {
   const [pendingCards, setPendingCards] = useState([])
+  const [batchOCR, setBatchOCR] = useState(false)
 
   const reloadCards = () => {
     fetch(`${APIENDPOINT}/pending_card_names`)
@@ -221,11 +261,12 @@ const Japanese = () => {
   return (
     <>
       <KanjiRecognition />
+      <Fab onClick={() => setBatchOCR(true)}>OCR</Fab>
       <Wrapper>
         {pendingCards.map((pendingCard) => {
           return (
             <React.Fragment key={pendingCard}>
-              <PendingCardItem cardLocation={pendingCard} reloadCards={reloadCards} />
+              <PendingCardItem batchOCR={batchOCR} cardLocation={pendingCard} reloadCards={reloadCards} />
             </React.Fragment>
           )
         })}

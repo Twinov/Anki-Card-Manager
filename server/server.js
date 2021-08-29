@@ -6,6 +6,7 @@ const fs = require('fs')
 const mv = require('mv')
 const sqlite3 = require('sqlite3').verbose()
 const fetch = require('node-fetch')
+const queue = require('express-queue')
 
 const constants = require('./constants')
 
@@ -59,9 +60,23 @@ app.post('/api/mass_sentence_add', (req, res) => {
     console.log(data.toString())
   })
   python.on('close', (code) => {
-    console.log(`child process close with code ${code}`)
+    console.log(`mass_sentence_add.py process closed with code ${code}`)
   })
   res.json({ status: 'success' })
+})
+
+app.post('/api/ocr_image', queue({ activeLimit: 1, queuedLimit: -1}), (req, res) => {
+  console.log(`running easyocr on image ${req.body.imageLocation}`)
+  const python = spawn('python', ['easyocr_wrapper.py', `${constants.ANKICARDSLOCATION}${req.body.imageLocation}`])
+  result = ''
+  python.stdout.on('data', (data) => {
+    result = data.toString().substring(0, data.toString().length - 1)
+  })
+  python.on('close', (code) => {
+    console.log(result)
+    console.log(`easyocr_wrapper.py process closed with code ${code}`)
+    res.json({ result: result })
+  })
 })
 
 app.get('/api/pending_card_names', (req, res) => {
