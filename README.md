@@ -1,14 +1,14 @@
 # Anki-Card-Manager
-A frontend for Anki flashcard card creation and field updating.    
-Made for my own use, so functionality is only what I need/want.  
+A frontend for Anki flashcard card creation and field updating.  
 
 Supported functionality:
 - Add example sentences to Chinese card decks
 - Add mined Japanese sentence cards to Anki in combination with [Yomichan](https://foosoft.net/projects/yomichan/)  
+- Extract Japanese sentences from screenshots using [EasyOCR](https://github.com/JaidedAI/EasyOCR)  
+- Correct mistakes in OCR by drawing Kanji with [Handwriting.js](https://github.com/ChenYuHo/handwriting.js)  
 
-Example of a pending screenshot to be mined and the result:  
-![Pending Screenshot](https://github.com//Twinov/Anki-Card-Manager//blob/main/pendingscreenshot.jpg?raw=true)  
-![Result](https://github.com//Twinov/Anki-Card-Manager//blob/main/result.jpg?raw=true)  
+![Screenshot](https://github.com//Twinov/Anki-Card-Manager//blob/main/screenshot1.jpg?raw=true)  
+![Screenshot](https://github.com//Twinov/Anki-Card-Manager//blob/main/screenshot2.jpg?raw=true)  
 
 # Usage
 ## Backend Node.js Server:
