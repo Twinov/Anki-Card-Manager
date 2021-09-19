@@ -12,5 +12,6 @@ for im in images:
     joined = ''
     res = reader.readtext(im, detail=0)
     for text in res:
-        joined += text
+        if len(text) > 7:
+            joined += text
     print(joined)

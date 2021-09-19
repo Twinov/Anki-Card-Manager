@@ -61,7 +61,7 @@ const CardButtons = styled.div`
   gap: 5px;
 `
 
-const PendingCardItem = ({ batchOCR, cardLocation, reloadCards }) => {
+const PendingCardItem = ({ cardLocation, reloadCards }) => {
   const [inputText, setInputText] = useState('')
   const [createdCards, setCreatedCards] = useState([])
 
@@ -95,7 +95,7 @@ const PendingCardItem = ({ batchOCR, cardLocation, reloadCards }) => {
   }
 
   const ocrImage = () => {
-    if (batchOCR && inputText.length === 0) {
+    if (createdCards.length == 0) {
       fetch(`${APIENDPOINT}/ocr_image`, {
         method: 'POST',
         headers: {
@@ -207,7 +207,6 @@ const PendingCardItem = ({ batchOCR, cardLocation, reloadCards }) => {
   }
 
   useEffect(() => scanForIDs(cardLocation), [])
-  useEffect(() => ocrImage(), [batchOCR])
   useEffect(() => findInfo(), [createdCards])
 
   return (
@@ -216,7 +215,7 @@ const PendingCardItem = ({ batchOCR, cardLocation, reloadCards }) => {
       <CardActions>
         <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
         <CardButtons>
-          <Button onClick={() => ocrImage(cardLocation)}>Run OCR</Button>
+          <Button className='OCRButton' style={{color: createdCards.length > 0 ? '#D50000' : ''}} onClick={() => ocrImage(cardLocation)}>Run OCR</Button>
           <p>Parsed Text: [{inputText}]</p>
         </CardButtons>
         <CardButtons>
@@ -237,19 +236,25 @@ const PendingCardItem = ({ batchOCR, cardLocation, reloadCards }) => {
   )
 }
 PendingCardItem.propTypes = {
-  batchOCR: PropTypes.bool.isRequired,
   cardLocation: PropTypes.string.isRequired,
   reloadCards: PropTypes.func.isRequired,
 }
 
 const Japanese = () => {
   const [pendingCards, setPendingCards] = useState([])
-  const [batchOCR, setBatchOCR] = useState(false)
 
   const reloadCards = () => {
     fetch(`${APIENDPOINT}/pending_card_names`)
       .then((response) => response.json())
       .then((res) => setPendingCards(res['cardNames']))
+  }
+
+  const batchOcr = () => {
+    const buttons = document.getElementsByClassName('OCRButton')
+
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].click()
+    }
   }
 
   useEffect(() => {
@@ -261,12 +266,12 @@ const Japanese = () => {
   return (
     <>
       <KanjiRecognition />
-      <Fab onClick={() => setBatchOCR(true)}>OCR</Fab>
+      <Fab onClick={() => batchOcr()}>OCR</Fab>
       <Wrapper>
         {pendingCards.map((pendingCard) => {
           return (
             <React.Fragment key={pendingCard}>
-              <PendingCardItem batchOCR={batchOCR} cardLocation={pendingCard} reloadCards={reloadCards} />
+              <PendingCardItem cardLocation={pendingCard} reloadCards={reloadCards} />
             </React.Fragment>
           )
         })}
