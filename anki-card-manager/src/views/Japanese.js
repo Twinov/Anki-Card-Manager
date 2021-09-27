@@ -8,19 +8,37 @@ import KanjiRecognition from './KanjiRecognition'
 
 const { TextArea } = Input
 
-const Fab = styled.button`
+const OCRFab = styled.button`
   position: fixed;
   z-index: 15;
   cursor: pointer;
-  background-color: #ffc0cb;
+  background-color: #b28dff;
   width: 100px;
   height: 100px;
   border-radius: 100%;
-  background: #ffc0cb;
+  background: #b28dff;
   border: none;
   outline: none;
   right: 50px;
   bottom: 50px;
+  color: #fff;
+  font-size: 36px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+`
+
+const KanjiDrawingFab = styled.button`
+  position: fixed;
+  z-index: 15;
+  cursor: pointer;
+  background-color: #c5a3ff;
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  background: #c5a3ff;
+  border: none;
+  outline: none;
+  right: 75px;
+  bottom: 160px;
   color: #fff;
   font-size: 36px;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
@@ -242,6 +260,7 @@ PendingCardItem.propTypes = {
 
 const Japanese = () => {
   const [pendingCards, setPendingCards] = useState([])
+  const [showKanjiRecognition, setShowKanjiRecognition] = useState(false)
 
   const reloadCards = () => {
     fetch(`${APIENDPOINT}/pending_card_names`)
@@ -265,8 +284,9 @@ const Japanese = () => {
 
   return (
     <>
-      <KanjiRecognition />
-      <Fab onClick={() => batchOcr()}>OCR</Fab>
+      {showKanjiRecognition && <KanjiRecognition />}
+      <KanjiDrawingFab onClick={() => setShowKanjiRecognition(!showKanjiRecognition)}>字</KanjiDrawingFab>
+      <OCRFab onClick={() => batchOcr()}>OCR</OCRFab>
       <Wrapper>
         {pendingCards.map((pendingCard) => {
           return (
