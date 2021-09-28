@@ -54,8 +54,13 @@ const Wrapper = styled.div`
 const PendingCardWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  margin: 10px;
+  padding: 10px;
   gap: 15px;
+`
+
+const ImageAndTitle = styled.div`
+  display: flex;
+  flex-direction: column;
 `
 
 const CardImage = styled(Image)`
@@ -224,16 +229,33 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
     }
   }
 
+  const titleColor = () => {
+    if (createdCards.length > 0 && inputText.length > 0) {
+      return '#77dd777d'
+    } else if (inputText.length > 0) {
+      return '#fdfd967d'
+    } else {
+      return '#ff80ab7d'
+    }
+  }
+
   useEffect(() => scanForIDs(cardLocation), [])
   useEffect(() => findInfo(), [createdCards])
 
   return (
     <PendingCardWrapper>
-      <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
+      <ImageAndTitle>
+        <div style={{ backgroundColor: titleColor()}}>
+          <p style={{ textAlign: 'center', position: 'relative', top: '50%', transform: 'translateY(30%)' }}>{cardLocation}</p>
+        </div>
+        <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
+      </ImageAndTitle>
       <CardActions>
         <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
         <CardButtons>
-          <Button className='OCRButton' style={{color: createdCards.length > 0 ? '#D50000' : ''}} onClick={() => ocrImage(cardLocation)}>Run OCR</Button>
+          <Button className='OCRButton' style={{ color: createdCards.length > 0 ? '#D50000' : '' }} onClick={() => ocrImage(cardLocation)}>
+            Run OCR
+          </Button>
           <p>Parsed Text: [{inputText}]</p>
         </CardButtons>
         <CardButtons>
