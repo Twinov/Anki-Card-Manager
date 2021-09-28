@@ -117,8 +117,13 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
       .then((response) => setInputText(response['result'][0]['fields']['Sentence']['value']))
   }
 
-  const ocrImage = () => {
-    if (createdCards.length == 0) {
+  const ocrImage = (ocrAttempt) => {
+    if (createdCards.length == 0 && inputText.length == 0 && ocrAttempt < 5) {
+      const startTime = new Date()
+      notification.open({
+        message: 'OCR Image Status',
+        description: `running OCR on ${cardLocation}`,
+      })
       fetch(`${APIENDPOINT}/ocr_image`, {
         method: 'POST',
         headers: {
@@ -129,7 +134,28 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
         }),
       })
         .then((response) => response.json())
-        .then((response) => setInputText(response['result']))
+        .then((response) => {
+          setInputText(response['result'])
+          notification.open({
+            message: 'OCR Image Status',
+            description: `OCR successfully returned ${response['result']} for ${cardLocation}`,
+          })
+        })
+        .catch((error) => {
+          console.error(error)
+          console.log(`request failed in ${Math.round((new Date() - startTime) / 1000)}, retrying attempt ${ocrAttempt + 1}`)
+          ocrImage(ocrAttempt + 1)
+        })
+    } else if (createdCards.length == 0 && inputText.length != 0) {
+      notification.open({
+        message: 'OCR Image Status',
+        description: 'Please clear the input field first',
+      })
+    } else if (createdCards.length == 0 && ocrAttempt >= 5) {
+      notification.open({
+        message: 'OCR Image Status',
+        description: `Giving up on ${cardLocation}, please try again manually.`,
+      })
     }
   }
 
@@ -245,7 +271,7 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
   return (
     <PendingCardWrapper>
       <ImageAndTitle>
-        <div style={{ backgroundColor: titleColor()}}>
+        <div style={{ backgroundColor: titleColor() }}>
           <p style={{ textAlign: 'center', position: 'relative', top: '50%', transform: 'translateY(30%)' }}>{cardLocation}</p>
         </div>
         <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
@@ -253,7 +279,13 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
       <CardActions>
         <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
         <CardButtons>
-          <Button className='OCRButton' style={{ color: createdCards.length > 0 ? '#D50000' : '' }} onClick={() => ocrImage(cardLocation)}>
+          <Button
+            className={createdCards.length == 0 && inputText.length == 0 ? 'OCRButton' : ''}
+            style={{ color: createdCards.length > 0 ? '#D50000' : '' }}
+            onClick={() => {
+              ocrImage(0)
+            }}
+          >
             Run OCR
           </Button>
           <p>Parsed Text: [{inputText}]</p>
@@ -290,12 +322,15 @@ const Japanese = () => {
       .then((res) => setPendingCards(res['cardNames']))
   }
 
-  const batchOcr = () => {
-    const buttons = document.getElementsByClassName('OCRButton')
-
+  const batchOcr = async () => {
+    const buttons = document.querySelectorAll('.OCRButton')
+    const avgOcrTime = 30
     for (var i = 0; i < buttons.length; i++) {
       buttons[i].click()
+      //due to React being weird, need to sleep to avoid timeouts
+      await new Promise((r) => setTimeout(r, avgOcrTime * 1000))
     }
+    console.log('Completed batch OCR run')
   }
 
   useEffect(() => {

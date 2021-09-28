@@ -67,6 +67,7 @@ app.post('/api/mass_sentence_add', (req, res) => {
 
 app.post('/api/ocr_image', queue({ activeLimit: 1, queuedLimit: -1}), (req, res) => {
   console.log(`running easyocr on image ${req.body.imageLocation}`)
+  var startTime = new Date()
   const python = spawn('python', ['easyocr_wrapper.py', `${constants.ANKICARDSLOCATION}${req.body.imageLocation}`])
   result = ''
   python.stdout.on('data', (data) => {
@@ -74,7 +75,7 @@ app.post('/api/ocr_image', queue({ activeLimit: 1, queuedLimit: -1}), (req, res)
   })
   python.on('close', (code) => {
     console.log(result)
-    console.log(`easyocr_wrapper.py process closed with code ${code}`)
+    console.log(`easyocr_wrapper.py process closed with code ${code} in ${Math.round((new Date() - startTime) / 1000)} seconds`)
     res.json({ result: result })
   })
 })
