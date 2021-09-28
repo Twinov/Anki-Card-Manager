@@ -44,6 +44,24 @@ const KanjiDrawingFab = styled.button`
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 `
 
+const HideDoneFab = styled.button`
+  position: fixed;
+  z-index: 15;
+  cursor: pointer;
+  background-color: #77dd77;
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  background: #77dd77;
+  border: none;
+  outline: none;
+  right: 75px;
+  bottom: 220px;
+  color: #fff;
+  font-size: 36px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+`
+
 const Wrapper = styled.div`
   height: 100vh;
   display: flex;
@@ -84,7 +102,7 @@ const CardButtons = styled.div`
   gap: 5px;
 `
 
-const PendingCardItem = ({ cardLocation, reloadCards }) => {
+const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
   const [inputText, setInputText] = useState('')
   const [createdCards, setCreatedCards] = useState([])
 
@@ -265,56 +283,65 @@ const PendingCardItem = ({ cardLocation, reloadCards }) => {
     }
   }
 
+  const displayCard = () => {
+    if (hideDone && createdCards.length > 0 && inputText.length > 0) return false
+    return true
+  }
+
   useEffect(() => scanForIDs(cardLocation), [])
   useEffect(() => findInfo(), [createdCards])
 
   return (
-    <PendingCardWrapper>
-      <ImageAndTitle>
-        <div style={{ backgroundColor: titleColor() }}>
-          <p style={{ textAlign: 'center', position: 'relative', top: '50%', transform: 'translateY(30%)' }}>{cardLocation}</p>
-        </div>
-        <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
-      </ImageAndTitle>
-      <CardActions>
-        <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
-        <CardButtons>
-          <Button
-            className={createdCards.length == 0 && inputText.length == 0 ? 'OCRButton' : ''}
-            style={{ color: createdCards.length > 0 ? '#D50000' : '' }}
-            onClick={() => {
-              ocrImage(0)
-            }}
-          >
-            Run OCR
-          </Button>
-          <p>Parsed Text: [{inputText}]</p>
-        </CardButtons>
-        <CardButtons>
-          <Button onClick={() => scanForIDs(inputText)}>Scan for created cards</Button>
-          <p>Found Card IDs: {JSON.stringify(createdCards).split(',').join(', ')}</p>
-        </CardButtons>
-        <CardButtons>
-          <Button type='primary' onClick={() => addImageToCard()}>
-            Add Pic to Card
-          </Button>
-          <Button onClick={() => doneWithImage()}>Move to Done</Button>
-          <Button danger onClick={() => deleteImage()}>
-            Delete Image
-          </Button>
-        </CardButtons>
-      </CardActions>
-    </PendingCardWrapper>
+    displayCard() && (
+      <PendingCardWrapper>
+        <ImageAndTitle>
+          <div style={{ backgroundColor: titleColor() }}>
+            <p style={{ textAlign: 'center', position: 'relative', top: '50%', transform: 'translateY(30%)' }}>{cardLocation}</p>
+          </div>
+          <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
+        </ImageAndTitle>
+        <CardActions>
+          <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
+          <CardButtons>
+            <Button
+              className={createdCards.length == 0 && inputText.length == 0 ? 'OCRButton' : ''}
+              style={{ color: createdCards.length > 0 ? '#D50000' : '' }}
+              onClick={() => {
+                ocrImage(0)
+              }}
+            >
+              Run OCR
+            </Button>
+            <p>Parsed Text: [{inputText}]</p>
+          </CardButtons>
+          <CardButtons>
+            <Button onClick={() => scanForIDs(inputText)}>Scan for created cards</Button>
+            <p>Found Card IDs: {JSON.stringify(createdCards).split(',').join(', ')}</p>
+          </CardButtons>
+          <CardButtons>
+            <Button type='primary' onClick={() => addImageToCard()}>
+              Add Pic to Card
+            </Button>
+            <Button onClick={() => doneWithImage()}>Move to Done</Button>
+            <Button danger onClick={() => deleteImage()}>
+              Delete Image
+            </Button>
+          </CardButtons>
+        </CardActions>
+      </PendingCardWrapper>
+    )
   )
 }
 PendingCardItem.propTypes = {
   cardLocation: PropTypes.string.isRequired,
+  hideDone: PropTypes.bool.isRequired,
   reloadCards: PropTypes.func.isRequired,
 }
 
 const Japanese = () => {
   const [pendingCards, setPendingCards] = useState([])
   const [showKanjiRecognition, setShowKanjiRecognition] = useState(false)
+  const [hideDone, setHideDone] = useState(false)
 
   const reloadCards = () => {
     fetch(`${APIENDPOINT}/pending_card_names`)
@@ -342,13 +369,14 @@ const Japanese = () => {
   return (
     <>
       {showKanjiRecognition && <KanjiRecognition />}
+      <HideDoneFab onClick={() => setHideDone(!hideDone)}>👁️</HideDoneFab>
       <KanjiDrawingFab onClick={() => setShowKanjiRecognition(!showKanjiRecognition)}>字</KanjiDrawingFab>
       <OCRFab onClick={() => batchOcr()}>OCR</OCRFab>
       <Wrapper>
         {pendingCards.map((pendingCard) => {
           return (
             <React.Fragment key={pendingCard}>
-              <PendingCardItem cardLocation={pendingCard} reloadCards={reloadCards} />
+              <PendingCardItem cardLocation={pendingCard} hideDone={hideDone} reloadCards={reloadCards} />
             </React.Fragment>
           )
         })}
