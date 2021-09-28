@@ -2,8 +2,12 @@ import easyocr
 import sys
 
 images = []
-for path in sys.argv[1:]:
-    images.append(path)
+full = False
+for arg in sys.argv[1:]:
+    if arg == 'full':
+        full = True
+    else:
+        images.append(arg)
 
 if not images:
     print('failure')
@@ -12,6 +16,6 @@ for im in images:
     joined = ''
     res = reader.readtext(im, detail=0)
     for text in res:
-        if len(text) > 7:
+        if full or len(text) > 7:
             joined += text
     print(joined)

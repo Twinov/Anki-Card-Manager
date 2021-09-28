@@ -135,14 +135,15 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
       .then((response) => setInputText(response['result'][0]['fields']['Sentence']['value']))
   }
 
-  const ocrImage = (ocrAttempt) => {
+  const ocrImage = (ocrAttempt, fullOCR) => {
     if (createdCards.length == 0 && inputText.length == 0 && ocrAttempt < 5) {
       const startTime = new Date()
       notification.open({
         message: 'OCR Image Status',
-        description: `running OCR on ${cardLocation}`,
+        description: fullOCR ? `running full OCR on ${cardLocation}` : `running OCR on ${cardLocation}`,
       })
-      fetch(`${APIENDPOINT}/ocr_image`, {
+      const ocrEndpoint = fullOCR ? `${APIENDPOINT}/full_ocr_image` : `${APIENDPOINT}/ocr_image`
+      fetch(ocrEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +163,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
         .catch((error) => {
           console.error(error)
           console.log(`request failed in ${Math.round((new Date() - startTime) / 1000)}, retrying attempt ${ocrAttempt + 1}`)
-          ocrImage(ocrAttempt + 1)
+          ocrImage(ocrAttempt + 1, fullOCR)
         })
     } else if (createdCards.length == 0 && inputText.length != 0) {
       notification.open({
@@ -307,11 +308,22 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
               className={createdCards.length == 0 && inputText.length == 0 ? 'OCRButton' : ''}
               style={{ color: createdCards.length > 0 ? '#D50000' : '' }}
               onClick={() => {
-                ocrImage(0)
+                ocrImage(0, false)
               }}
             >
               Run OCR
             </Button>
+            {inputText.length == 0 && (
+              <Button
+                className={createdCards.length == 0 && inputText.length == 0 ? 'OCRButton' : ''}
+                style={{ color: createdCards.length > 0 ? '#D50000' : '' }}
+                onClick={() => {
+                  ocrImage(0, true)
+                }}
+              >
+                Full OCR
+              </Button>
+            )}
             <p>Parsed Text: [{inputText}]</p>
           </CardButtons>
           <CardButtons>

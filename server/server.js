@@ -80,6 +80,21 @@ app.post('/api/ocr_image', queue({ activeLimit: 1, queuedLimit: -1}), (req, res)
   })
 })
 
+app.post('/api/full_ocr_image', queue({ activeLimit: 1, queuedLimit: -1 }), (req, res) => {
+  console.log(`running full easyocr on image ${req.body.imageLocation}`)
+  var startTime = new Date()
+  const python = spawn('python', ['easyocr_wrapper.py', 'full', `${constants.ANKICARDSLOCATION}${req.body.imageLocation}`])
+  result = ''
+  python.stdout.on('data', (data) => {
+    result = data.toString().substring(0, data.toString().length - 1)
+  })
+  python.on('close', (code) => {
+    console.log(result)
+    console.log(`easyocr_wrapper.py process closed with code ${code} in ${Math.round((new Date() - startTime) / 1000)} seconds`)
+    res.json({ result: result })
+  })
+})
+
 app.get('/api/pending_card_names', (req, res) => {
   console.log('retrieving pending card names')
   const pendingCards = []
