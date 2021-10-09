@@ -297,7 +297,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
       <PendingCardWrapper>
         <ImageAndTitle>
           <div style={{ backgroundColor: titleColor() }}>
-            <p style={{ textAlign: 'center', position: 'relative', top: '50%', transform: 'translateY(30%)' }}>{cardLocation}</p>
+            <p style={{ textAlign: 'center', position: 'relative', transform: 'translateY(30%)' }}>{cardLocation}</p>
           </div>
           <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
         </ImageAndTitle>
