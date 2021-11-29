@@ -117,7 +117,10 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
       }),
     })
       .then((response) => response.json())
-      .then((response) => response.result !== null ?? setCreatedCards(response.result))
+      .then((response) => {
+        if (response.result !== null) 
+          setCreatedCards(response.result)
+      })
   }
 
   const findInfo = () => {
