@@ -117,7 +117,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
       }),
     })
       .then((response) => response.json())
-      .then((response) => setCreatedCards(response.result))
+      .then((response) => response.result !== null ?? setCreatedCards(response.result))
   }
 
   const findInfo = () => {
@@ -275,7 +275,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
   }
 
   const titleColor = () => {
-    if (createdCards.length > 0 && inputText.length > 0) {
+    if (createdCards && createdCards.length > 0 && inputText.length > 0) {
       return '#77dd777d'
     } else if (inputText.length > 0) {
       return '#fdfd967d'
@@ -305,7 +305,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
           <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
           <CardButtons>
             <Button
-              className={createdCards.length == 0 && inputText.length == 0 ? 'OCRButton' : ''}
+              className={createdCards && createdCards.length === 0 && inputText.length == 0 ? 'OCRButton' : ''}
               style={{ color: createdCards.length > 0 ? '#D50000' : '' }}
               onClick={() => {
                 ocrImage(0, false)
