@@ -318,7 +318,6 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
             </Button>
             {inputText.length == 0 && (
               <Button
-                className={createdCards.length == 0 && inputText.length == 0 ? 'OCRButton' : ''}
                 style={{ color: createdCards.length > 0 ? '#D50000' : '' }}
                 onClick={() => {
                   ocrImage(0, true)
@@ -358,6 +357,9 @@ const Japanese = () => {
   const [showKanjiRecognition, setShowKanjiRecognition] = useState(false)
   const [hideDone, setHideDone] = useState(false)
 
+  const [doneOcr, setDoneOcr] = useState(0)
+  const [batchOcrLimit, setBatchOcrLimit] = useState(0)
+
   const reloadCards = () => {
     fetch(`${APIENDPOINT}/pending_card_names`)
       .then((response) => response.json())
@@ -366,13 +368,18 @@ const Japanese = () => {
 
   const batchOcr = async () => {
     const buttons = document.querySelectorAll('.OCRButton')
-    const avgOcrTime = 30
-    for (var i = 0; i < buttons.length; i++) {
+    const avgOcrTime = 45
+    setDoneOcr(0)
+    const ocrLimit = Math.min(buttons.length, 25) // need to ensure backend doesn't get out of sync
+    setBatchOcrLimit(ocrLimit) // react state hooks have a delay
+    console.log('Starting batch OCR run of ' + ocrLimit + ' image(s)')
+    for (var i = 0; i < ocrLimit; i++) {
       buttons[i].click()
       //due to React being weird, need to sleep to avoid timeouts
       await new Promise((r) => setTimeout(r, avgOcrTime * 1000))
+      setDoneOcr(prevCount => prevCount + 1)
     }
-    console.log('Completed batch OCR run')
+    console.log('Completed batch OCR run of ' + ocrLimit + ' image(s)')
   }
 
   useEffect(() => {
@@ -386,7 +393,7 @@ const Japanese = () => {
       {showKanjiRecognition && <KanjiRecognition />}
       <HideDoneFab onClick={() => setHideDone(!hideDone)}>👁️</HideDoneFab>
       <KanjiDrawingFab onClick={() => setShowKanjiRecognition(!showKanjiRecognition)}>字</KanjiDrawingFab>
-      <OCRFab onClick={() => batchOcr()}>OCR</OCRFab>
+      <OCRFab onClick={() => batchOcr()}>{doneOcr === batchOcrLimit ? 'OCR' : `${doneOcr}/${batchOcrLimit}`}</OCRFab>
       <Wrapper>
         {pendingCards.map((pendingCard) => {
           return (
