@@ -18,4 +18,9 @@ for im in images:
     for text in res:
         if full or len(text) > 7:
             joined += text
+    
+    #tweaks to improve accuracy around commas
+    joined = joined.replace(' ', '、')
+    joined = joined.replace(';', '、')
+    
     print(joined)
