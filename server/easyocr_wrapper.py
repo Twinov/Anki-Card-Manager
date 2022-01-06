@@ -22,5 +22,15 @@ for im in images:
     #tweaks to improve accuracy around commas
     joined = joined.replace(' ', '、')
     joined = joined.replace(';', '、')
-    
+    joined = joined.replace(',', '、')
+
+    #remove leading and ending cjk quotation marks
+    if '「' == joined[0] or '『' == joined[0]:
+        joined = joined[1:]
+    if '」' == joined[-1] or '』' == joined[-1]:
+        joined = joined[0:-1]
+
+    #some lol fixes for characters that annoy me
+    joined = joined.replace('?', '？')
+
     print(joined)
