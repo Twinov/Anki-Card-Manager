@@ -69,6 +69,11 @@ const Wrapper = styled.div`
   align-items: center;
 `
 
+const ClipboardButton = styled(Button)`
+  height: 50px;
+  margin: 10px;
+`
+
 const PendingCardWrapper = styled.div`
   display: flex;
   flex-direction: row;
@@ -118,8 +123,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
     })
       .then((response) => response.json())
       .then((response) => {
-        if (response.result !== null) 
-          setCreatedCards(response.result)
+        if (response.result !== null) setCreatedCards(response.result)
       })
   }
 
@@ -357,8 +361,12 @@ const Japanese = () => {
   const [showKanjiRecognition, setShowKanjiRecognition] = useState(false)
   const [hideDone, setHideDone] = useState(false)
 
+  const [avgOcrTime, setAvgOcrTime] = useState(45)
   const [doneOcr, setDoneOcr] = useState(0)
   const [batchOcrLimit, setBatchOcrLimit] = useState(0)
+
+  const [clipboardImageURL, setClipboardImageURL] = useState('')
+  const [clipboardImageBase64, setClipboardImageBase64] = useState('')
 
   const reloadCards = () => {
     fetch(`${APIENDPOINT}/pending_card_names`)
@@ -368,7 +376,6 @@ const Japanese = () => {
 
   const batchOcr = async () => {
     const buttons = document.querySelectorAll('.OCRButton')
-    const avgOcrTime = 45
     setDoneOcr(0)
     const ocrLimit = Math.min(buttons.length, 25) // need to ensure backend doesn't get out of sync
     setBatchOcrLimit(ocrLimit) // react state hooks have a delay
@@ -378,16 +385,59 @@ const Japanese = () => {
       buttons[i].click()
       //due to React being weird, need to sleep to avoid timeouts
       await new Promise((r) => setTimeout(r, avgOcrTime * 1000))
-      setDoneOcr(prevCount => prevCount + 1)
+      setDoneOcr((prevCount) => prevCount + 1)
       setAvgOcrTime(Math.round((new Date() - startTime) / 1000) + 5)
     }
     console.log('Completed batch OCR run of ' + ocrLimit + ' image(s)')
+  }
+
+  const uploadClipboardImage = () => {
+    fetch(`${APIENDPOINT}/add_image_to_queue`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ image: clipboardImageBase64 }),
+    })
+      .then((response) => response.json)
+      .then(() => {
+        reloadCards()
+        setClipboardImageBase64('')
+        setClipboardImageURL('')
+      })
   }
 
   useEffect(() => {
     fetch(`${APIENDPOINT}/pending_card_names`)
       .then((response) => response.json())
       .then((res) => setPendingCards(res['cardNames']))
+
+    document.addEventListener('paste', function (evt) {
+      // Get the data of clipboard
+      const clipboardItems = evt.clipboardData.items
+      const items = [].slice.call(clipboardItems).filter(function (item) {
+        // Filter the image items only
+        return item.type.indexOf('image') !== -1
+      })
+      if (items.length === 0) {
+        return
+      }
+
+      const item = items[0]
+      // Get the blob of image
+      const blob = item.getAsFile()
+      setClipboardImageURL(URL.createObjectURL(blob))
+      const blobToBase64 = (target) => {
+        const reader = new FileReader()
+        reader.readAsDataURL(target)
+        return new Promise((resolve) => {
+          reader.onloadend = () => {
+            resolve(reader.result)
+          }
+        })
+      }
+      blobToBase64(blob).then((res) => setClipboardImageBase64(res))
+    })
   }, [])
 
   return (
@@ -404,6 +454,16 @@ const Japanese = () => {
             </React.Fragment>
           )
         })}
+
+        {clipboardImageURL && (
+          <>
+            <p>Image pasted from clipboard:</p>
+            <Image src={clipboardImageURL} />
+            <ClipboardButton size='large' onClick={() => uploadClipboardImage()}>
+              create new card from clipboard contents
+            </ClipboardButton>
+          </>
+        )}
       </Wrapper>
     </>
   )

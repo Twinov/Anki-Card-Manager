@@ -21,7 +21,7 @@ const app = express()
 const port = 3003
 
 app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
+app.use(express.json({ limit: '50mb' }))
 // app.use(
 //   expressWinston.logger({
 //     transports: [new winston.transports.Console()],
@@ -65,7 +65,27 @@ app.post('/api/mass_sentence_add', (req, res) => {
   res.json({ status: 'success' })
 })
 
-app.post('/api/ocr_image', queue({ activeLimit: 1, queuedLimit: -1}), (req, res) => {
+app.post('/api/add_image_to_queue', (req, res) => {
+  console.log('adding image to queue')
+  let timestamp = new Date()
+  const baseImage = req.body.image
+
+  // from https://stackoverflow.com/a/54662788
+  const ext = baseImage.substring(baseImage.indexOf('/') + 1, baseImage.indexOf(';base64'))
+  const fileType = baseImage.substring('data:'.length, baseImage.indexOf('/'))
+  const regex = new RegExp(`^data:${fileType}\/${ext};base64,`, 'gi')
+  const base64Data = baseImage.replace(regex, '')
+
+  const imageFilename = timestamp.toISOString().slice(0, 19).replace(':', '').replace(':', '') + '.' + ext
+  console.log(imageFilename)
+  require('fs').writeFile(`${constants.ANKICARDSLOCATION}${imageFilename}`, base64Data, 'base64', function (err) {
+    if (err) return console.log(err)
+  })
+  console.log(`${constants.ANKICARDSLOCATION}${imageFilename} successfully created`)
+  res.json({ status: 'success' })
+})
+
+app.post('/api/ocr_image', queue({ activeLimit: 1, queuedLimit: -1 }), (req, res) => {
   console.log(`running easyocr on image ${req.body.imageLocation}`)
   var startTime = new Date()
   const python = spawn('python', ['easyocr_wrapper.py', `${constants.ANKICARDSLOCATION}${req.body.imageLocation}`])
@@ -138,7 +158,7 @@ app.post('/api/move_image_to_done', (req, res) => {
   try {
     const oldPath = `${constants.ANKICARDSLOCATION}${req.body.imageLocation}`
     const newPath = `${constants.ANKIDONECARDSLOCATION}${req.body.imageLocation}`
-    mv(oldPath, newPath, {clobber: false}, function (err) {
+    mv(oldPath, newPath, { clobber: false }, function (err) {
       if (err) {
         console.log(err)
       } else {
@@ -175,7 +195,7 @@ app.post('/api/note_info_wrapper', (req, res) => {
       action: 'notesInfo',
       version: 6,
       params: {
-        notes: JSON.parse(req.body.cardIDs)
+        notes: JSON.parse(req.body.cardIDs),
       },
     }),
   })
