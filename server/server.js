@@ -102,11 +102,22 @@ app.get('/api/pending_card_names', (req, res) => {
     if (err) {
       throw err
     }
-
-    files.forEach((file) => {
-      pendingCards.push(file)
+    filesSorted = files
+      .map(function (fileName) {
+        return {
+          name: fileName,
+          time: fs.statSync(constants.ANKICARDSLOCATION + '/' + fileName).mtimeMs,
+        }
+      })
+      .sort(function (a, b) {
+        return a.time - b.time
+      })
+      .map(function (v) {
+        return v.name
+      })
+    filesSorted.forEach((file) => {
+      if (file !== '.directory') pendingCards.push(file)
     })
-
     res.json({ cardNames: pendingCards })
   })
 })
