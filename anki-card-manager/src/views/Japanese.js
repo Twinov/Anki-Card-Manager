@@ -374,10 +374,12 @@ const Japanese = () => {
     setBatchOcrLimit(ocrLimit) // react state hooks have a delay
     console.log('Starting batch OCR run of ' + ocrLimit + ' image(s)')
     for (var i = 0; i < ocrLimit; i++) {
+      let startTime = new Date()
       buttons[i].click()
       //due to React being weird, need to sleep to avoid timeouts
       await new Promise((r) => setTimeout(r, avgOcrTime * 1000))
       setDoneOcr(prevCount => prevCount + 1)
+      setAvgOcrTime(Math.round((new Date() - startTime) / 1000) + 5)
     }
     console.log('Completed batch OCR run of ' + ocrLimit + ' image(s)')
   }
