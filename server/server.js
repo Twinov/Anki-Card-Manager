@@ -204,7 +204,10 @@ app.post('/api/note_info_wrapper', (req, res) => {
 })
 
 app.post('/api/add_image_to_card', (req, res) => {
-  console.log(`Adding image ${req.body.imageLocation} to card ${req.body.cardID}`)
+  if (req.body.sourceText)
+    console.log(`Adding image ${req.body.imageLocation} with text ${req.body.sourceText} to card ${req.body.cardID}`)
+  else
+    console.log(`Adding image ${req.body.imageLocation} to card ${req.body.cardID}`)
 
   fetch(constants.ANKICONNECTENDPOINT, {
     method: 'POST',
@@ -215,7 +218,7 @@ app.post('/api/add_image_to_card', (req, res) => {
         note: {
           id: req.body.cardID,
           fields: {
-            Source: '',
+            Source: req.body.sourceText,
           },
           picture: [
             {

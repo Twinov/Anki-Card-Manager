@@ -109,6 +109,8 @@ const CardButtons = styled.div`
 
 const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
   const [inputText, setInputText] = useState('')
+  const [toggleSourceText, setToggleSourceText] = useState(false)
+  const [sourceText, setSourceText] = useState('')
   const [createdCards, setCreatedCards] = useState([])
 
   const scanForIDs = (query) => {
@@ -191,6 +193,9 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
         message: 'Add Image Status',
         description: 'No cards to add pictures to!',
       })
+    //https://stackoverflow.com/a/1500501
+    const urlRegex = /(https?:\/\/[^\s]+)/g
+    const sourceTextPayload = toggleSourceText && sourceText.trim() ? sourceText.trim().replace(urlRegex, '<a href="$1">$1</a>') : ''
     createdCards.forEach((id) => {
       fetch(`${APIENDPOINT}/add_image_to_card`, {
         method: 'POST',
@@ -200,6 +205,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
         body: JSON.stringify({
           cardID: id,
           imageLocation: cardLocation,
+          sourceText: sourceTextPayload,
         }),
       })
         .then((response) => response.json())
@@ -310,6 +316,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
         </ImageAndTitle>
         <CardActions>
           <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
+          {toggleSourceText && <CardInput rows={1} autoSize={true} value={sourceText} onChange={(e) => setSourceText(e.target.value)} />}
           <CardButtons>
             <Button
               className={createdCards && createdCards.length === 0 && inputText.length == 0 ? 'OCRButton' : ''}
@@ -330,8 +337,9 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
                 Full OCR
               </Button>
             )}
-            <p>Parsed Text: [{inputText}]</p>
+            <Button onClick={() => setToggleSourceText(!toggleSourceText)}>Source Text</Button>
           </CardButtons>
+          <p>Parsed Text: [{inputText}]</p>
           <CardButtons>
             <Button onClick={() => scanForIDs(inputText)}>Scan for created cards</Button>
             <p>Found Card IDs: {JSON.stringify(createdCards).split(',').join(', ')}</p>
