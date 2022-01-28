@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Button, Image, Input, notification } from 'antd'
+import { Button, Image, Input, Modal, notification } from 'antd'
 import PropTypes from 'prop-types'
 
 import { APIENDPOINT } from '../constants'
@@ -454,16 +454,21 @@ const Japanese = () => {
             </React.Fragment>
           )
         })}
-
-        {clipboardImageURL && (
-          <>
-            <p>Image pasted from clipboard:</p>
-            <Image src={clipboardImageURL} />
-            <ClipboardButton size='large' onClick={() => uploadClipboardImage()}>
+        <Modal
+          visible={clipboardImageURL}
+          onCancel={() => {
+            setClipboardImageURL('')
+            setClipboardImageBase64('')
+          }}
+          footer={[
+            <ClipboardButton key='makeNewCard' size='large' onClick={() => uploadClipboardImage()}>
               create new card from clipboard contents
-            </ClipboardButton>
-          </>
-        )}
+            </ClipboardButton>,
+          ]}
+        >
+          <p>Image pasted from clipboard:</p>
+          <Image src={clipboardImageURL} />
+        </Modal>
       </Wrapper>
     </>
   )
