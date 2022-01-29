@@ -135,7 +135,8 @@ app.get('/api/pending_card_names', (req, res) => {
       .map(function (v) {
         return v.name
       })
-    filesSorted.forEach((file) => {
+    //change to filesSorted for sorted based on time, current is based on name
+    files.forEach((file) => {
       if (file !== '.directory') pendingCards.push(file)
     })
     res.json({ cardNames: pendingCards })
