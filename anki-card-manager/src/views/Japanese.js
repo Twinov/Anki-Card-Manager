@@ -112,6 +112,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
   const [toggleSourceText, setToggleSourceText] = useState(false)
   const [sourceText, setSourceText] = useState('')
   const [createdCards, setCreatedCards] = useState([])
+  const [imageHash, setImageHash] = useState(Date.now()) //https://stackoverflow.com/a/47923081
 
   const scanForIDs = (query) => {
     fetch(`${APIENDPOINT}/find_note_wrapper`, {
@@ -185,6 +186,27 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
         description: `Giving up on ${cardLocation}, please try again manually.`,
       })
     }
+  }
+
+  const autocrop = () => {
+    const autocropEndpoint = `${APIENDPOINT}/autocrop_image`
+    fetch(autocropEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageLocation: cardLocation,
+      }),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        notification.open({
+          message: 'Autocrop Image Status',
+          description: `Autocrop returned ${response['result']} for ${cardLocation}`,
+        })
+        setImageHash(Date.now())
+      })
   }
 
   const addImageToCard = () => {
@@ -312,7 +334,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
           <div style={{ backgroundColor: titleColor() }}>
             <p style={{ textAlign: 'center', position: 'relative', transform: 'translateY(30%)' }}>{cardLocation}</p>
           </div>
-          <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}`} />
+          <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}?t=${imageHash}`} />
         </ImageAndTitle>
         <CardActions>
           <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
@@ -338,6 +360,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
               </Button>
             )}
             <Button onClick={() => setToggleSourceText(!toggleSourceText)}>Source Text</Button>
+            <Button onClick={() => autocrop()}>Crop</Button>
           </CardButtons>
           <p>Parsed Text: [{inputText}]</p>
           <CardButtons>

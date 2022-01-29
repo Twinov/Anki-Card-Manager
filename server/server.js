@@ -7,6 +7,7 @@ const mv = require('mv')
 const sqlite3 = require('sqlite3').verbose()
 const fetch = require('node-fetch')
 const queue = require('express-queue')
+const im = require('imagemagick')
 
 const constants = require('./constants')
 
@@ -112,6 +113,16 @@ app.post('/api/full_ocr_image', queue({ activeLimit: 1, queuedLimit: -1 }), (req
     console.log(result)
     console.log(`easyocr_wrapper.py process closed with code ${code} in ${Math.round((new Date() - startTime) / 1000)} seconds`)
     res.json({ result: result })
+  })
+})
+
+app.post('/api/autocrop_image', (req, res) => {
+  console.log(`running autocrop on ${req.body.imageLocation}`)
+  const fileLoc = `${constants.ANKICARDSLOCATION}${req.body.imageLocation}`
+  im.convert([fileLoc, '-trim', '+repage', fileLoc], function (err, stdout) {
+    if (err) throw err
+    console.log(`finished autocrop for ${req.body.imageLocation}`)
+    res.json({ result: 'success' })
   })
 })
 
