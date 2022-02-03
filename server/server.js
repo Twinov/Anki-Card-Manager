@@ -8,6 +8,9 @@ const sqlite3 = require('sqlite3').verbose()
 const fetch = require('node-fetch')
 const queue = require('express-queue')
 const im = require('imagemagick')
+const imagemin = require('imagemin')
+const imageminJpegtran = require('imagemin-jpegtran')
+const imageminPngquant = require('imagemin-pngquant')
 
 const constants = require('./constants')
 
@@ -116,13 +119,25 @@ app.post('/api/full_ocr_image', queue({ activeLimit: 1, queuedLimit: -1 }), (req
   })
 })
 
-app.post('/api/autocrop_image', (req, res) => {
-  console.log(`running autocrop on ${req.body.imageLocation}`)
+app.post('/api/optimize_image', (req, res) => {
+  console.log(`running image optimization on ${req.body.imageLocation}`)
   const fileLoc = `${constants.ANKICARDSLOCATION}${req.body.imageLocation}`
   im.convert([fileLoc, '-trim', '+repage', fileLoc], function (err, stdout) {
     if (err) throw err
-    console.log(`finished autocrop for ${req.body.imageLocation}`)
-    res.json({ result: 'success' })
+    console.log(`finished crop for ${req.body.imageLocation}`)
+    imagemin([`${constants.ANKICARDSLOCATION}${req.body.imageLocation}`], {
+      destination: constants.ANKICARDSLOCATION,
+      plugins: [
+        imageminJpegtran(),
+        imageminPngquant({
+          quality: [0.6, 0.8],
+          verbose: true,
+        }),
+      ],
+    }).then(() => {
+      console.log(`finished optimization for ${req.body.imageLocation}`)
+      res.json({ result: 'success' })
+    })
   })
 })
 
@@ -216,10 +231,8 @@ app.post('/api/note_info_wrapper', (req, res) => {
 })
 
 app.post('/api/add_image_to_card', (req, res) => {
-  if (req.body.sourceText)
-    console.log(`Adding image ${req.body.imageLocation} with text ${req.body.sourceText} to card ${req.body.cardID}`)
-  else
-    console.log(`Adding image ${req.body.imageLocation} to card ${req.body.cardID}`)
+  if (req.body.sourceText) console.log(`Adding image ${req.body.imageLocation} with text ${req.body.sourceText} to card ${req.body.cardID}`)
+  else console.log(`Adding image ${req.body.imageLocation} to card ${req.body.cardID}`)
 
   fetch(constants.ANKICONNECTENDPOINT, {
     method: 'POST',

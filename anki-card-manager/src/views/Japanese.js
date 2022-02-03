@@ -188,9 +188,9 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
     }
   }
 
-  const autocrop = () => {
-    const autocropEndpoint = `${APIENDPOINT}/autocrop_image`
-    fetch(autocropEndpoint, {
+  const optimizeImage = () => {
+    const optimizeEndpoint = `${APIENDPOINT}/optimize_image`
+    fetch(optimizeEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -202,8 +202,8 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
       .then((response) => response.json())
       .then((response) => {
         notification.open({
-          message: 'Autocrop Image Status',
-          description: `Autocrop returned ${response['result']} for ${cardLocation}`,
+          message: 'Image Optimization Status',
+          description: `Optimize returned ${response['result']} for ${cardLocation}`,
         })
         setImageHash(Date.now())
       })
@@ -360,7 +360,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
               </Button>
             )}
             <Button onClick={() => setToggleSourceText(!toggleSourceText)}>Source Text</Button>
-            <Button onClick={() => autocrop()}>Crop</Button>
+            <Button onClick={() => optimizeImage()}>Optimize</Button>
           </CardButtons>
           <p>Parsed Text: [{inputText}]</p>
           <CardButtons>
