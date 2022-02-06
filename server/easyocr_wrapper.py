@@ -18,7 +18,12 @@ for im in images:
     for text in res:
         if full or len(text) > 7:
             joined += text
-    
+
+    #messes with anki search
+    bad_chars = ['(', ')', '\'', '\"']
+    for c in bad_chars:
+        joined.replace('c', '')
+
     #tweaks to improve accuracy around commas
     joined = joined.replace(' ', '、')
     joined = joined.replace(';', '、')
