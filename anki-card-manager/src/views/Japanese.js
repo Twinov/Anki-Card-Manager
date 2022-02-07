@@ -341,7 +341,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
           {toggleSourceText && <CardInput rows={1} autoSize={true} value={sourceText} onChange={(e) => setSourceText(e.target.value)} />}
           <CardButtons>
             <Button
-              className={createdCards && createdCards.length === 0 && inputText.length == 0 ? 'OCRButton' : ''}
+              className={createdCards && createdCards.length === 0 && inputText.length == 0 ? 'BatchOCRButton' : ''}
               style={{ color: createdCards.length > 0 ? '#D50000' : '' }}
               onClick={() => {
                 ocrImage(0, false)
@@ -360,7 +360,12 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
               </Button>
             )}
             <Button onClick={() => setToggleSourceText(!toggleSourceText)}>Source Text</Button>
-            <Button onClick={() => optimizeImage()}>Optimize</Button>
+            <Button
+              className={createdCards && createdCards.length === 0 && inputText.length == 0 ? 'BatchOptimizeButton' : ''}
+              onClick={() => optimizeImage()}
+            >
+              Optimize
+            </Button>
           </CardButtons>
           <p>Parsed Text: [{inputText}]</p>
           <CardButtons>
@@ -406,14 +411,16 @@ const Japanese = () => {
   }
 
   const batchOcr = async () => {
-    const buttons = document.querySelectorAll('.OCRButton')
+    const ocrButtons = document.querySelectorAll('.BatchOCRButton')
+    const optimizeButtons = document.querySelectorAll('.BatchOptimizeButton')
     setDoneOcr(0)
-    const ocrLimit = Math.min(buttons.length, 25) // need to ensure backend doesn't get out of sync
+    const ocrLimit = Math.min(ocrButtons.length, optimizeButtons.length, 25) // need to ensure backend doesn't get out of sync
     setBatchOcrLimit(ocrLimit) // react state hooks have a delay
     console.log('Starting batch OCR run of ' + ocrLimit + ' image(s)')
     for (var i = 0; i < ocrLimit; i++) {
       let startTime = new Date()
-      buttons[i].click()
+      ocrButtons[i].click()
+      optimizeButtons[i].click()
       //due to React being weird, need to sleep to avoid timeouts
       await new Promise((r) => setTimeout(r, avgOcrTime * 1000))
       setDoneOcr((prevCount) => prevCount + 1)
