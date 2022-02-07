@@ -122,7 +122,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
       },
       body: JSON.stringify({
         query: query,
-        clean: clean
+        clean: clean,
       }),
     })
       .then((response) => response.json())
@@ -361,10 +361,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
               </Button>
             )}
             <Button onClick={() => setToggleSourceText(!toggleSourceText)}>Source Text</Button>
-            <Button
-              className={createdCards && createdCards.length === 0 && inputText.length == 0 ? 'BatchOptimizeButton' : ''}
-              onClick={() => optimizeImage()}
-            >
+            <Button className={createdCards && createdCards.length === 0 && inputText.length == 0 ? 'BatchOptimizeButton' : ''} onClick={() => optimizeImage()}>
               Optimize
             </Button>
           </CardButtons>

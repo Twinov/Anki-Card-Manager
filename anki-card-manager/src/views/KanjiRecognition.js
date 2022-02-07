@@ -10,7 +10,6 @@ const DrawInputWrapper = styled.div`
   position: fixed;
   pointer-events: auto;
   left: 50px;
-  bottom: 50px;
   width: 400px;
   height: 390px;
   border-radius: 20px;
@@ -18,6 +17,13 @@ const DrawInputWrapper = styled.div`
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 `
 
+const DrawInputTop = styled.div`
+  margin-top: 5px;
+  margin-bottom: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`
 const DrawInputBottom = styled.div`
   height: 40px;
   width: 100%;
@@ -44,8 +50,7 @@ const Canvas = styled.canvas`
 
 const CanvasTitle = styled.h2`
   text-align: center;
-  margin-top: 5px;
-  margin-bottom: 0px;
+  margin-bottom: 0;
 `
 
 const KanjiRecognition = () => {
@@ -55,6 +60,9 @@ const KanjiRecognition = () => {
   const [inputSuggestions, setInputSuggestions] = useState([])
 
   const [loading, setLoading] = useState(true)
+
+  const [distFromBottom, setDistFromBottom] = useState(50)
+  const distIncrement = 100
 
   const inputOptions = {
     width: 300, //int, width of the writing area, default: undefined
@@ -102,8 +110,16 @@ const KanjiRecognition = () => {
 
   return (
     !loading && (
-      <DrawInputWrapper>
-        <CanvasTitle>Kanji Search</CanvasTitle>
+      <DrawInputWrapper style={{ bottom: distFromBottom }}>
+        <DrawInputTop>
+          <Button shape='round' style={{ marginLeft: '10px' }} onClick={() => setDistFromBottom(distFromBottom + distIncrement)}>
+            ⬆️
+          </Button>
+          <CanvasTitle>Kanji Search</CanvasTitle>
+          <Button shape='round' style={{ marginRight: '10px' }} onClick={() => setDistFromBottom(distFromBottom - distIncrement)}>
+            ⬇️
+          </Button>
+        </DrawInputTop>
         <Canvas width={300} height={300} id={'handInput'} />
         <DrawInputBottom>
           <Button shape='round' onClick={recognizeKanji}>
