@@ -199,16 +199,16 @@ app.post('/api/move_image_to_done', (req, res) => {
 })
 
 app.post('/api/find_note_wrapper', (req, res) => {
-  console.log(`getting note IDs for query: ${req.body.query}`)
   const cleanQuery = (input) => input.replaceAll(/[\\*_():"-]/g, (matches) => `\\` + matches[0])
-  console.log(cleanQuery(req.body.query))
+  const query = req.body.clean ? cleanQuery(req.body.query) : req.body.query
+  console.log(`getting note IDs for query: ${query}`)
   fetch(constants.ANKICONNECTENDPOINT, {
     method: 'POST',
     body: JSON.stringify({
       action: 'findNotes',
       version: 6,
       params: {
-        query: cleanQuery(req.body.query),
+        query: query,
       },
     }),
   })

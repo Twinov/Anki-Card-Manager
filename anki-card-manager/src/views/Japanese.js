@@ -114,7 +114,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
   const [createdCards, setCreatedCards] = useState([])
   const [imageHash, setImageHash] = useState(Date.now()) //https://stackoverflow.com/a/47923081
 
-  const scanForIDs = (query) => {
+  const scanForIDs = (query, clean) => {
     fetch(`${APIENDPOINT}/find_note_wrapper`, {
       method: 'POST',
       headers: {
@@ -122,6 +122,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
       },
       body: JSON.stringify({
         query: query,
+        clean: clean
       }),
     })
       .then((response) => response.json())
@@ -324,7 +325,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
     return true
   }
 
-  useEffect(() => scanForIDs(cardLocation), [])
+  useEffect(() => scanForIDs(cardLocation, false), [])
   useEffect(() => findInfo(), [createdCards])
 
   return (
@@ -369,7 +370,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
           </CardButtons>
           <p>Parsed Text: [{inputText}]</p>
           <CardButtons>
-            <Button onClick={() => scanForIDs(inputText)}>Scan for created cards</Button>
+            <Button onClick={() => scanForIDs(inputText, true)}>Scan for created cards</Button>
             <p>Found Card IDs: {JSON.stringify(createdCards).split(',').join(', ')}</p>
           </CardButtons>
           <CardButtons>
