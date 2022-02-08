@@ -143,7 +143,15 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
       }),
     })
       .then((response) => response.json())
-      .then((response) => setInputText(response['result'][0]['fields']['Sentence']['value']))
+      .then((response) => {
+        setInputText(response['result'][0]['fields']['Sentence']['value'])
+        const sourceFieldText = response['result'][0]['fields']['Source']['value']
+        // trim down because it's in the form blah blah <img source...></img> with the image
+        if (sourceFieldText.substring(0, sourceFieldText.indexOf('<img'))) {
+          setToggleSourceText(true)
+          setSourceText(sourceFieldText.substring(0, sourceFieldText.indexOf('<')))
+        }
+      })
   }
 
   const ocrImage = (ocrAttempt, fullOCR) => {
