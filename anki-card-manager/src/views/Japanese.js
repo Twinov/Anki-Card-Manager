@@ -107,6 +107,10 @@ const CardButtons = styled.div`
   gap: 5px;
 `
 
+const formatHtmlSpecialChars = (text) => {
+  return text.replaceAll('&amp;', '&').replaceAll('&lt;', '<').replaceAll('&gt;', '>')
+}
+
 const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
   const [inputText, setInputText] = useState('')
   const [toggleSourceText, setToggleSourceText] = useState(false)
@@ -144,7 +148,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
     })
       .then((response) => response.json())
       .then((response) => {
-        setInputText(response['result'][0]['fields']['Sentence']['value'])
+        setInputText(formatHtmlSpecialChars(response['result'][0]['fields']['Sentence']['value']))
         const sourceFieldText = response['result'][0]['fields']['Source']['value']
         // trim down because it's in the form blah blah <img source...></img> with the image
         if (sourceFieldText.substring(0, sourceFieldText.indexOf('<img'))) {
@@ -173,7 +177,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
       })
         .then((response) => response.json())
         .then((response) => {
-          setInputText(response['result'])
+          setInputText(formatHtmlSpecialChars(response['result']))
           notification.open({
             message: 'OCR Image Status',
             description: `OCR successfully returned ${response['result']} for ${cardLocation}`,

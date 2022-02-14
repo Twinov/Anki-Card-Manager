@@ -199,7 +199,12 @@ app.post('/api/move_image_to_done', (req, res) => {
 })
 
 app.post('/api/find_note_wrapper', (req, res) => {
-  const cleanQuery = (input) => input.replaceAll(/[\\*_():"-]/g, (matches) => `\\` + matches[0])
+  const cleanQuery = (input) =>
+    input
+      .replaceAll(/[\\*_():"-]/g, (matches) => `\\` + matches[0])
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
   const query = req.body.clean ? cleanQuery(req.body.query) : req.body.query
   console.log(`getting note IDs for query: ${query}`)
   fetch(constants.ANKICONNECTENDPOINT, {
