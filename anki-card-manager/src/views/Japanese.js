@@ -44,6 +44,24 @@ const KanjiDrawingFab = styled.button`
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 `
 
+const JumpToNextUnfinishedFab = styled.button`
+  position: fixed;
+  z-index: 15;
+  cursor: pointer;
+  background-color: #c5a3ff;
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  background: #c5a3ff;
+  border: none;
+  outline: none;
+  right: 75px;
+  bottom: 220px;
+  color: #fff;
+  font-size: 25px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+`
+
 const HideDoneFab = styled.button`
   position: fixed;
   z-index: 15;
@@ -56,7 +74,7 @@ const HideDoneFab = styled.button`
   border: none;
   outline: none;
   right: 75px;
-  bottom: 220px;
+  bottom: 280px;
   color: #fff;
   font-size: 36px;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
@@ -344,7 +362,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
     displayCard() && (
       <PendingCardWrapper>
         <ImageAndTitle>
-          <div style={{ backgroundColor: titleColor() }}>
+          <div style={{ backgroundColor: titleColor() }} className={createdCards.length > 0 ? '' : 'unfinished'}>
             <p style={{ textAlign: 'center', position: 'relative', transform: 'translateY(30%)' }}>{cardLocation}</p>
           </div>
           <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}?t=${imageHash}`} />
@@ -439,6 +457,10 @@ const Japanese = () => {
     console.log('Completed batch OCR run of ' + ocrLimit + ' image(s)')
   }
 
+  const jumpToNextUnfinished = () => {
+    document.getElementsByClassName('unfinished')[0].scrollIntoView({ behavior: 'smooth' })
+  }
+
   const uploadClipboardImage = () => {
     fetch(`${APIENDPOINT}/add_image_to_queue`, {
       method: 'POST',
@@ -493,6 +515,7 @@ const Japanese = () => {
       {showKanjiRecognition && <KanjiRecognition />}
       <HideDoneFab onClick={() => setHideDone(!hideDone)}>👁️</HideDoneFab>
       <KanjiDrawingFab onClick={() => setShowKanjiRecognition(!showKanjiRecognition)}>字</KanjiDrawingFab>
+      <JumpToNextUnfinishedFab onClick={() => jumpToNextUnfinished()}>⬇️</JumpToNextUnfinishedFab>
       <OCRFab onClick={() => batchOcr()}>{doneOcr === batchOcrLimit ? 'OCR' : `${doneOcr}/${batchOcrLimit}`}</OCRFab>
       <Wrapper>
         {pendingCards.map((pendingCard) => {
