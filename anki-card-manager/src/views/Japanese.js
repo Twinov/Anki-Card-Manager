@@ -458,7 +458,12 @@ const Japanese = () => {
   }
 
   const jumpToNextUnfinished = () => {
-    document.getElementsByClassName('unfinished')[0].scrollIntoView({ behavior: 'smooth' })
+    if (document.getElementsByClassName('unfinished')[0]) document.getElementsByClassName('unfinished')[0].scrollIntoView({ behavior: 'smooth' })
+    else
+      notification.open({
+        message: 'Unfinished Images',
+        description: 'No unfinished images to jump to!',
+      })
   }
 
   const uploadClipboardImage = () => {
