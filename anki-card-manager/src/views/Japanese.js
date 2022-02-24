@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Button, Image, Input, Modal, notification } from 'antd'
+import { Button, Image, Input, InputNumber, Modal, notification } from 'antd'
 import PropTypes from 'prop-types'
 
 import { APIENDPOINT } from '../constants'
@@ -87,7 +87,7 @@ const Wrapper = styled.div`
   align-items: center;
 `
 
-const ClipboardButton = styled(Button)`
+const ModalButton = styled(Button)`
   height: 50px;
   margin: 10px;
 `
@@ -425,6 +425,7 @@ const Japanese = () => {
   const [showKanjiRecognition, setShowKanjiRecognition] = useState(false)
   const [hideDone, setHideDone] = useState(false)
 
+  const [ocrModalVisible, setOcrModalVisible] = useState(false)
   const [avgOcrTime, setAvgOcrTime] = useState(45)
   const [doneOcr, setDoneOcr] = useState(0)
   const [batchOcrLimit, setBatchOcrLimit] = useState(0)
@@ -442,7 +443,7 @@ const Japanese = () => {
     const ocrButtons = document.querySelectorAll('.BatchOCRButton')
     const optimizeButtons = document.querySelectorAll('.BatchOptimizeButton')
     setDoneOcr(0)
-    const ocrLimit = Math.min(ocrButtons.length, optimizeButtons.length, 25) // need to ensure backend doesn't get out of sync
+    const ocrLimit = Math.min(ocrButtons.length, optimizeButtons.length, batchOcrLimit) // need to ensure backend doesn't get out of sync
     setBatchOcrLimit(ocrLimit) // react state hooks have a delay
     console.log('Starting batch OCR run of ' + ocrLimit + ' image(s)')
     for (var i = 0; i < ocrLimit; i++) {
@@ -521,7 +522,7 @@ const Japanese = () => {
       <HideDoneFab onClick={() => setHideDone(!hideDone)}>👁️</HideDoneFab>
       <KanjiDrawingFab onClick={() => setShowKanjiRecognition(!showKanjiRecognition)}>字</KanjiDrawingFab>
       <JumpToNextUnfinishedFab onClick={() => jumpToNextUnfinished()}>⬇️</JumpToNextUnfinishedFab>
-      <OCRFab onClick={() => batchOcr()}>{doneOcr === batchOcrLimit ? 'OCR' : `${doneOcr}/${batchOcrLimit}`}</OCRFab>
+      <OCRFab onClick={() => setOcrModalVisible(true)}>{doneOcr === batchOcrLimit ? 'OCR' : `${doneOcr}/${batchOcrLimit}`}</OCRFab>
       <Wrapper>
         {pendingCards.map((pendingCard) => {
           return (
@@ -537,13 +538,37 @@ const Japanese = () => {
             setClipboardImageBase64('')
           }}
           footer={[
-            <ClipboardButton key='makeNewCard' size='large' onClick={() => uploadClipboardImage()}>
+            <ModalButton key='makeNewCard' size='large' onClick={() => uploadClipboardImage()}>
               create new card from clipboard contents
-            </ClipboardButton>,
+            </ModalButton>,
           ]}
         >
           <p>Image pasted from clipboard:</p>
           <Image src={clipboardImageURL} />
+        </Modal>
+        <Modal
+          centered
+          visible={ocrModalVisible}
+          onCancel={() => {
+            setOcrModalVisible(false)
+            setBatchOcrLimit(0)
+            setDoneOcr(0)
+          }}
+          footer={[
+            <ModalButton
+              key='startOcr'
+              onClick={() => {
+                batchOcr()
+                setOcrModalVisible(false)
+              }}
+            >
+              Start OCR
+            </ModalButton>,
+          ]}
+        >
+          <p>Number of cards to OCR:</p>
+          <InputNumber defaultValue={25} onChange={(value) => setBatchOcrLimit(value)} />
+          <p>Delay between OCR: {avgOcrTime}</p>
         </Modal>
       </Wrapper>
     </>
