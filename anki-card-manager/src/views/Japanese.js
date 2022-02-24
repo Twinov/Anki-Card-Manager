@@ -80,6 +80,15 @@ const HideDoneFab = styled.button`
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 `
 
+const StatsDiv = styled.div`
+  position: fixed;
+  z-index: 15;
+  flex-direction: column;
+  align-items: center;
+  right: 50px;
+  top: 50px;
+`
+
 const Wrapper = styled.div`
   height: 100vh;
   display: flex;
@@ -422,6 +431,8 @@ PendingCardItem.propTypes = {
 
 const Japanese = () => {
   const [pendingCards, setPendingCards] = useState([])
+  const [unfinishedCards, setUnfinishedCards] = useState(0)
+  const [currentSessionCompleted, setCurrentSessionCompleted] = useState(0)
   const [showKanjiRecognition, setShowKanjiRecognition] = useState(false)
   const [hideDone, setHideDone] = useState(false)
 
@@ -483,6 +494,14 @@ const Japanese = () => {
       })
   }
 
+  const refreshStats = () => {
+    // not rly true but w/e, good enough
+    const batchOcrButtons = document.querySelectorAll('.BatchOCRButton')
+    const lastUnfinished = unfinishedCards
+    setUnfinishedCards(pendingCards.length - batchOcrButtons.length)
+    if (lastUnfinished) setCurrentSessionCompleted(pendingCards.length - batchOcrButtons.length - lastUnfinished)
+  }
+
   useEffect(() => {
     fetch(`${APIENDPOINT}/pending_card_names`)
       .then((response) => response.json())
@@ -514,6 +533,12 @@ const Japanese = () => {
       }
       blobToBase64(blob).then((res) => setClipboardImageBase64(res))
     })
+
+    // update stats every min
+    const interval = setInterval(() => {
+      refreshStats()
+    }, 60000)
+    return () => clearInterval(interval)
   }, [])
 
   return (
@@ -523,6 +548,13 @@ const Japanese = () => {
       <KanjiDrawingFab onClick={() => setShowKanjiRecognition(!showKanjiRecognition)}>字</KanjiDrawingFab>
       <JumpToNextUnfinishedFab onClick={() => jumpToNextUnfinished()}>⬇️</JumpToNextUnfinishedFab>
       <OCRFab onClick={() => setOcrModalVisible(true)}>{doneOcr === batchOcrLimit ? 'OCR' : `${doneOcr}/${batchOcrLimit}`}</OCRFab>
+      <StatsDiv>
+        <p>Current Stats:</p>
+        <p>Total Loaded Cards: {pendingCards.length}</p>
+        <p>Unfinished Cards: {unfinishedCards}</p>
+        <p>Cards done this session: {currentSessionCompleted}</p>
+        <Button onClick={() => refreshStats()}>Refresh</Button>
+      </StatsDiv>
       <Wrapper>
         {pendingCards.map((pendingCard) => {
           return (
