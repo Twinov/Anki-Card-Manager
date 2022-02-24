@@ -25,22 +25,23 @@ def invoke(action, **params):
         raise Exception(response['error'])
     return response['result']
 
-field_name = 'Glossary'
+CHARACTER_FIELD = 'Front'
+DEFINITION_FIELD = 'Glossary'
 
 notes_ids = invoke('findNotes', query='re:"<li>(https?://.+?\.jpg)"')
 notes = invoke('notesInfo', notes=notes_ids)
 words = []
 
 for i, note in enumerate(notes):
-    words.append(note['fields']['Front']['value'])
+    words.append(note['fields'][CHARACTER_FIELD]['value'])
     print('fixing', words[-1], 'ID: ', notes_ids[i])
-    previous = note['fields'][field_name]['value']
+    previous = note['fields'][DEFINITION_FIELD]['value']
     replacement_text = re.sub(r'<li>(https?://.+?\.jpg)', r'<li><a href="\1">\1</a>', previous)
     print('previous text:')
     print(previous)
     print('new text:')
     print(replacement_text)
-    invoke('updateNoteFields', note={'id': notes_ids[i], 'fields': {field_name: replacement_text}})
+    invoke('updateNoteFields', note={'id': notes_ids[i], 'fields': {DEFINITION_FIELD: replacement_text}})
     print()
 
 print('Successfully fixed', len(notes_ids), 'card(s).')
