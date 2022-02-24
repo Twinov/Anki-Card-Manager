@@ -1,4 +1,5 @@
 */node_modules/
 server/constants.js
+server/test_requests.http
 */__pycache__/
 ankicardmanagervenv/
