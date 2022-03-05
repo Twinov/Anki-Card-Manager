@@ -32,5 +32,6 @@ for im in images:
 
     #some lol fixes for characters that annoy me
     joined = joined.replace('?', '？')
+    joined = joined.replace('!', '！')
 
     print(joined)
