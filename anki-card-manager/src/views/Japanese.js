@@ -139,13 +139,14 @@ const formatHtmlSpecialChars = (text) => {
 }
 
 const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
+  const [initiallyDone, setInitiallyDone] = useState(false)
   const [inputText, setInputText] = useState('')
   const [toggleSourceText, setToggleSourceText] = useState(false)
   const [sourceText, setSourceText] = useState('')
   const [createdCards, setCreatedCards] = useState([])
   const [imageHash, setImageHash] = useState(Date.now()) //https://stackoverflow.com/a/47923081
 
-  const scanForIDs = (query, clean) => {
+  const scanForIDs = (query, clean, firstRun) => {
     fetch(`${APIENDPOINT}/find_note_wrapper`, {
       method: 'POST',
       headers: {
@@ -158,7 +159,10 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
     })
       .then((response) => response.json())
       .then((response) => {
-        if (response.result !== null) setCreatedCards(response.result)
+        if (response.result !== null) {
+          setCreatedCards(response.result)
+          if (firstRun) setInitiallyDone(true)
+        }
       })
   }
 
@@ -360,11 +364,11 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
   }
 
   const displayCard = () => {
-    if (hideDone && createdCards.length > 0 && inputText.length > 0) return false
+    if (hideDone && initiallyDone && createdCards.length > 0 && inputText.length > 0) return false
     return true
   }
 
-  useEffect(() => scanForIDs(cardLocation, false), [])
+  useEffect(() => scanForIDs(cardLocation, false, true), [])
   useEffect(() => findInfo(), [createdCards])
 
   return (
@@ -406,7 +410,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
           </CardButtons>
           <p>Parsed Text: [{inputText}]</p>
           <CardButtons>
-            <Button onClick={() => scanForIDs(inputText, true)}>Scan for created cards</Button>
+            <Button onClick={() => scanForIDs(inputText, true, false)}>Scan for created cards</Button>
             <p>Found Card IDs: {JSON.stringify(createdCards).split(',').join(', ')}</p>
           </CardButtons>
           <CardButtons>
