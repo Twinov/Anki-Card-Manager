@@ -541,11 +541,6 @@ const Japanese = () => {
       blobToBase64(blob).then((res) => setClipboardImageBase64(res))
     })
 
-    // update stats every min
-    const interval = setInterval(() => {
-      refreshStats()
-    }, 60000 * 15)
-    return () => clearInterval(interval)
   }, [])
 
   return (
