@@ -130,7 +130,7 @@ app.post('/api/optimize_image', (req, res) => {
       plugins: [
         imageminJpegtran(),
         imageminPngquant({
-          quality: [0.5, 0.6],
+          quality: [0.7, 0.8],
           verbose: true,
         }),
       ],
