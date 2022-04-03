@@ -24,10 +24,11 @@ for im in images:
     joined = joined.replace(';', '、')
     joined = joined.replace(',', '、')
 
-    #remove leading and ending cjk quotation marks
-    if '「' == joined[0] or '『' == joined[0]:
+    #remove leading and ending cjk quotation marks and other undesirable chars
+    leading_ending_undesirables = ['「', '」', '『', '』', '(', ')']
+    while joined[0] in leading_ending_undesirables:
         joined = joined[1:]
-    if '」' == joined[-1] or '』' == joined[-1]:
+    while joined[-1] in leading_ending_undesirables:
         joined = joined[0:-1]
 
     #some lol fixes for characters that annoy me
