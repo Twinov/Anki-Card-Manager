@@ -437,6 +437,7 @@ const Japanese = () => {
   const [pendingCards, setPendingCards] = useState([])
   const [unfinishedCards, setUnfinishedCards] = useState(0)
   const [ocrPendingCards, setOcrPendingCards] = useState(0)
+  const [initCardsDone, setInitCardsDone] = useState(0)
   const [currentSessionCompleted, setCurrentSessionCompleted] = useState(0)
   const [showKanjiRecognition, setShowKanjiRecognition] = useState(false)
   const [hideDone, setHideDone] = useState(false)
@@ -503,10 +504,9 @@ const Japanese = () => {
     // not rly true but w/e, good enough
     const batchOcrButtons = document.querySelectorAll('.BatchOCRButton')
     const unfinishedLength = document.getElementsByClassName('unfinished').length
-    const lastUnfinished = unfinishedCards
     setUnfinishedCards(unfinishedLength)
     setOcrPendingCards(unfinishedLength - batchOcrButtons.length)
-    if (lastUnfinished) setCurrentSessionCompleted(lastUnfinished - unfinishedLength)
+    setCurrentSessionCompleted(pendingCards.length - unfinishedLength - initCardsDone)
   }
 
   useEffect(() => {
@@ -562,6 +562,7 @@ const Japanese = () => {
         <p>OCR&apos;d but pending cards: {ocrPendingCards}</p>
         <p>Cards done this session: {currentSessionCompleted}</p>
         <Button onClick={() => refreshStats()}>Refresh</Button>
+        <Button onClick={() => setInitCardsDone(pendingCards.length - document.getElementsByClassName('unfinished').length)}>Reset Session</Button>
       </StatsDiv>
       <Wrapper>
         {pendingCards.map((pendingCard) => {
