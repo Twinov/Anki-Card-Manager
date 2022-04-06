@@ -182,9 +182,10 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
         setInputText(formatHtmlSpecialChars(response['result'][0]['fields']['Sentence']['value']))
         const sourceFieldText = response['result'][0]['fields']['Source']['value']
         // trim down because it's in the form blah blah <img source...></img> with the image
-        if (sourceFieldText.substring(0, sourceFieldText.indexOf('<img'))) {
+        let srcText = sourceFieldText.substring(0, sourceFieldText.indexOf('<img'))
+        if (srcText) {
           setToggleSourceText(true)
-          setSourceText(sourceFieldText.substring(0, sourceFieldText.indexOf('<')))
+          setSourceText(srcText.includes('href') ? srcText.substring(srcText.indexOf('"') + 1, srcText.indexOf('>') - 1) : srcText)
         }
       })
   }
