@@ -61,7 +61,7 @@ const KanjiRecognition = () => {
 
   const [loading, setLoading] = useState(true)
 
-  const [distFromBottom, setDistFromBottom] = useState(50)
+  const [distFromBottom, setDistFromBottom] = useState(350)
   const distIncrement = 100
 
   const inputOptions = {
