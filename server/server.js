@@ -206,6 +206,7 @@ app.post('/api/find_note_wrapper', (req, res) => {
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;')
   const query = req.body.clean ? cleanQuery(req.body.query) : req.body.query
+  const wrappedQuery = `Front:${query} OR Sentence:${query} OR Source:*${query.split(/(\s+)/)[0]}*`
   console.log(`getting note IDs for query: ${query}`)
   fetch(constants.ANKICONNECTENDPOINT, {
     method: 'POST',
@@ -213,7 +214,7 @@ app.post('/api/find_note_wrapper', (req, res) => {
       action: 'findNotes',
       version: 6,
       params: {
-        query: query,
+        query: wrappedQuery,
       },
     }),
   })
