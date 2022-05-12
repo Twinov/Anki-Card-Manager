@@ -115,6 +115,8 @@ const ImageAndTitle = styled.div`
 
 const CardImage = styled(Image)`
   flex-shrink: 0;
+  max-height: 80vh;
+  max-width: 880px;
 `
 const CardActions = styled.div`
   display: flex;
@@ -379,7 +381,7 @@ const PendingCardItem = ({ cardLocation, hideDone, reloadCards }) => {
           <div style={{ backgroundColor: titleColor() }} className={createdCards.length > 0 ? '' : 'unfinished'}>
             <p style={{ textAlign: 'center', position: 'relative', transform: 'translateY(30%)' }}>{cardLocation}</p>
           </div>
-          <CardImage width={880} src={`${APIENDPOINT}/static/${cardLocation}?t=${imageHash}`} />
+          <CardImage src={`${APIENDPOINT}/static/${cardLocation}?t=${imageHash}`} />
         </ImageAndTitle>
         <CardActions>
           <CardInput rows={6} autoSize={true} value={inputText} onChange={(e) => setInputText(e.target.value)} />
@@ -541,7 +543,6 @@ const Japanese = () => {
       }
       blobToBase64(blob).then((res) => setClipboardImageBase64(res))
     })
-
   }, [])
 
   return (
@@ -580,8 +581,10 @@ const Japanese = () => {
             </ModalButton>,
           ]}
         >
-          <p>Image pasted from clipboard:</p>
-          <Image src={clipboardImageURL} />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+            <p>Image pasted from clipboard:</p>
+            <Image style={{ maxHeight: '60vh' }} src={clipboardImageURL} />
+          </div>
         </Modal>
         <Modal
           centered
