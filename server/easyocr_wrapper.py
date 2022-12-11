@@ -23,9 +23,11 @@ for im in images:
     joined = joined.replace(' ', '、')
     joined = joined.replace(';', '、')
     joined = joined.replace(',', '、')
+    joined = joined.replace('、、','、')
+    joined = joined.replace('。、','。')
 
     #remove leading and ending cjk quotation marks and other undesirable chars
-    leading_ending_undesirables = ['「', '」', '『', '』', '(', ')']
+    leading_ending_undesirables = ['「', '」', '『', '』', '(', ')','、']
     while joined[0] in leading_ending_undesirables:
         joined = joined[1:]
     while joined[-1] in leading_ending_undesirables:
@@ -34,5 +36,7 @@ for im in images:
     #some lol fixes for characters that annoy me
     joined = joined.replace('?', '？')
     joined = joined.replace('!', '！')
+
+    joined = joined.replace('値', '俺')
 
     print(joined)
