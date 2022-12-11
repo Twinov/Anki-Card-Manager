@@ -122,7 +122,7 @@ app.post('/api/full_ocr_image', queue({ activeLimit: 1, queuedLimit: -1 }), (req
 app.post('/api/optimize_image', (req, res) => {
   console.log(`running image optimization on ${req.body.imageLocation}`)
   const fileLoc = `${constants.ANKICARDSLOCATION}${req.body.imageLocation}`
-  im.convert([fileLoc, '-trim', '+repage', '-resize', '2500000@', fileLoc], function (err, stdout) {
+  im.convert([fileLoc, '-bordercolor', 'black', '-border', '1x1', '-fuzz', '1%', '-trim', '+repage', '-resize', '2500000@', fileLoc], function (err, stdout) {
     if (err) throw err
     console.log(`finished crop for ${req.body.imageLocation}`)
     imagemin([`${constants.ANKICARDSLOCATION}${req.body.imageLocation}`], {
