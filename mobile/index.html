@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mobile Anki Card Creation Helper</title>
+    <style>
+      body {
+        height: 100%;
+        width: 100%;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #app {
+        height: 100%;
+        width: 600px;
+      }
+
+      #word-input-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #canvas-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 500px;
+        width: 100%;
+        max-width: 600px;
+        background: #f1f1f1;
+      }
+
+      #canvas {
+        border: 1px solid #d4d4d4;
+        margin: 24px 0;
+        max-height: 500px;
+        max-width: 600px;
+      }
+
+      .action-bar {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="word-input-wrapper">
+        <input id="word-input" type="text" />
+        <button id="load-id">Get card ID</button>
+        <p id="loaded-id-p"></p>
+      </div>
+
+      <div id="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div class="action-bar">
+        <input id="file-input" type="file" accept="image/*" />
+        <div>
+          <button id="trim-button">Trim</button>
+          <button id="send-to-card">Add to card</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const wordInput = document.getElementById('word-input')
+      const loadIdButton = document.getElementById('load-id')
+      let loadedImageData
+      let canvas = document.getElementById('canvas')
+      const fileInput = document.getElementById('file-input')
+      let filename
+      const trimButton = document.getElementById('trim-button')
+      const sendToCardButton = document.getElementById('send-to-card')
+      const ankiConnectEndpoint = 'http://localhost:8765'
+
+      fileInput.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0]
+        filename = file.name
+        if (file) {
+          loadedImageData = await loadCanvasFromFile(canvas, file)
+        }
+      })
+
+      function loadCanvasFromFile(canvas, file) {
+        return new Promise((resolve) => {
+          const fileReader = new FileReader()
+
+          fileReader.onload = (event) => {
+            const image = new Image()
+
+            image.onload = async () => {
+              const context = canvas.getContext('2d')
+
+              canvas.width = image.naturalWidth
+              canvas.height = image.naturalHeight
+              context.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+              const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+              resolve(imageData)
+            }
+
+            const result = event?.target?.result
+            if (typeof result === 'string') {
+              image.src = result
+            }
+          }
+
+          fileReader.readAsDataURL(file)
+        })
+      }
+
+      loadIdButton.addEventListener('click', async () => {
+        const query = wordInput.value
+        console.log(query)
+        if (query != '') {
+          const wrappedQuery = `"Front:${query}" OR "Sentence:${query}"'`
+          fetch(ankiConnectEndpoint, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'findNotes',
+              version: 6,
+              params: {
+                query: wrappedQuery,
+              },
+            }),
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }).then((response) => {
+            console.log(response)
+          })
+        }
+      })
+
+      trimButton.addEventListener('click', async () => {
+        if (loadedImageData) {
+          cropImage(loadedImageData)
+        }
+      })
+
+      sendToCardButton.addEventListener('click', async () => {
+        const base64Image = canvas.toDataURL()
+        fetch(ankiConnectEndpoint, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'updateNoteFields',
+            version: 6,
+            params: {
+              note: {
+                id: req.body.cardID,
+                picture: [
+                  {
+                    data: base64Image,
+                    filename: filename,
+                    fields: ['Source'],
+                  },
+                ],
+              },
+            },
+          }),
+        })
+      })
+
+      // crop image whitespace:
+      function cropImage(image) {
+        let data = {}
+        let context = canvas.getContext('2d')
+        data = context.getImageData(0, 0, image.width, image.height).data
+
+        let top = scanY(true, image, data)
+        let bottom = scanY(false, image, data)
+        let left = scanX(true, image, data)
+        let right = scanX(false, image, data)
+
+        let new_width = right - left
+        let new_height = bottom - top
+
+        let imageBitmap = createImageBitmap(image)
+        Promise.resolve(imageBitmap).then((loaded) => {
+          canvas.width = new_width
+          canvas.height = new_height
+
+          context.drawImage(loaded, left, top, new_width, new_height, 0, 0, new_width, new_height)
+        })
+      }
+
+      // get pixel RGB data:
+      function getRGB(x, y, image, data) {
+        return {
+          red: data[(image.width * y + x) * 4],
+          green: data[(image.width * y + x) * 4 + 1],
+          blue: data[(image.width * y + x) * 4 + 2],
+        }
+      }
+
+      // check if pixel is black:
+      function isFull(rgb) {
+        return rgb.red == 0 && rgb.green == 0 && rgb.blue == 0
+      }
+
+      // scan top and bottom edges of image:
+      function scanY(top, image, data) {
+        let offset = top ? 1 : -1
+
+        for (let y = top ? 0 : image.height - 1; top ? y < image.height : y > -1; y += offset) {
+          for (let x = 0; x < image.width; x++) {
+            if (!isFull(getRGB(x, y, image, data))) {
+              return y
+            }
+          }
+        }
+
+        return null
+      }
+
+      // scan left and right edges of image:
+      function scanX(left, image, data) {
+        let offset = left ? 1 : -1
+
+        for (let x = left ? 0 : image.width - 1; left ? x < image.width : x > -1; x += offset) {
+          for (let y = 0; y < image.height; y++) {
+            if (!isFull(getRGB(x, y, image, data))) {
+              return x
+            }
+          }
+        }
+
+        return null
+      }
+    </script>
+  </body>
+</html>
