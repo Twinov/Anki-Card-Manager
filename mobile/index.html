@@ -149,7 +149,7 @@
       })
 
       sendToCardButton.addEventListener('click', async () => {
-        const base64Image = canvas.toDataURL()
+        const base64Image = canvas.toDataURL().substring(22) //trim out 'data:image/png;base64,'
         fetch(ankiConnectEndpoint, {
           method: 'POST',
           body: JSON.stringify({
@@ -157,7 +157,10 @@
             version: 6,
             params: {
               note: {
-                id: req.body.cardID,
+                id: Number(loadedIdP.innerText.split(' ').slice(-1)[0]),
+                fields: {
+                  Source: wordInput.innerText,
+                },
                 picture: [
                   {
                     data: base64Image,
