@@ -1,27 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mobile Anki Card Creation Helper</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous" />
+
     <style>
       body {
-        height: 100%;
-        width: 100%;
-        font-family: sans-serif;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        padding-top: 15vw;
       }
 
-      #app {
-        height: 100%;
-        width: 600px;
-      }
-
-      #word-input-wrapper {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      p {
+        text-align: center;
       }
 
       #canvas-wrapper {
@@ -41,36 +37,35 @@
         max-width: 600px;
       }
 
-      .action-bar {
+      #image-buttons {
         display: flex;
-        justify-content: space-between;
-        margin-top: 8px;
+        justify-content: center;
+        align-items: center;
       }
     </style>
   </head>
   <body>
     <div id="app">
-      <div id="word-input-wrapper">
-        <input id="word-input" type="text" />
-        <button id="load-id">Get card ID</button>
-        <p id="loaded-id-p"></p>
-      </div>
+      <input id="word-input" type="text" />
+      <p id="text-in-input-p" class="navbar-text">Text in input:</p>
+      <button id="load-id" class="form-control">Get card ID</button>
+      <p id="loaded-id-p" class="navbar-text">Found IDs:</p>
 
       <div id="canvas-wrapper">
-        <canvas id="canvas"></canvas>
+        <input id="file-input" type="file" accept="image/*" style="display: none" />
+        <canvas id="canvas" />
       </div>
 
-      <div class="action-bar">
-        <input id="file-input" type="file" accept="image/*" />
-        <div>
-          <button id="trim-button">Trim</button>
-          <button id="send-to-card">Add to card</button>
-        </div>
+      <div id="image-buttons" class="btn-group" role="group">
+        <button id="trim-button" class="btn btn-default">Trim</button>
+        <button id="send-to-card" class="btn btn-default">Add to card</button>
       </div>
+      <p id="output-p" class="navbar-text">Output:</p>
     </div>
 
     <script>
       const wordInput = document.getElementById('word-input')
+      const textInInputP = document.getElementById('text-in-input-p')
       const loadIdButton = document.getElementById('load-id')
       const loadedIdP = document.getElementById('loaded-id-p')
       let loadedImageData
@@ -79,6 +74,7 @@
       let filename
       const trimButton = document.getElementById('trim-button')
       const sendToCardButton = document.getElementById('send-to-card')
+      const outputP = document.getElementById('output-p')
       const ankiConnectEndpoint = 'http://localhost:8765'
 
       fileInput.addEventListener('change', async (event) => {
@@ -87,6 +83,10 @@
         if (file) {
           loadedImageData = await loadCanvasFromFile(canvas, file)
         }
+      })
+
+      canvas.addEventListener('click', () => {
+        fileInput.click()
       })
 
       function loadCanvasFromFile(canvas, file) {
@@ -117,6 +117,11 @@
         })
       }
 
+      wordInput.addEventListener('input', () => {
+        console.log('lol')
+        textInInputP.textContent = `Text in input: ${wordInput.value}`
+      })
+
       loadIdButton.addEventListener('click', async () => {
         const query = wordInput.value
         if (query != '') {
@@ -138,6 +143,7 @@
             .then((response) => response.json())
             .then((response) => {
               loadedIdP.textContent = `Found IDs: ${response.result}`
+              outputP.textContent = JSON.stringify(response)
             })
         }
       })
@@ -172,6 +178,10 @@
             },
           }),
         })
+          .then((response) => response.json())
+          .then((response) => {
+            outputP.textContent = JSON.stringify(response)
+          })
       })
 
       // crop image whitespace:
