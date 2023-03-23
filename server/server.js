@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const winston = require('winston')
 const expressWinston = require('express-winston')
 const { spawn } = require('child_process')
@@ -23,6 +24,8 @@ let db = new sqlite3.Database('./chinese_sentences.sqlite', sqlite3.OPEN_READONL
 
 const app = express()
 const port = 3003
+
+app.use(cors())
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json({ limit: '50mb' }))
