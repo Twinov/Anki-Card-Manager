@@ -118,7 +118,6 @@
       }
 
       wordInput.addEventListener('input', () => {
-        console.log('lol')
         textInInputP.textContent = `Text in input: ${wordInput.value}`
       })
 
@@ -165,7 +164,7 @@
               note: {
                 id: Number(loadedIdP.innerText.split(' ').slice(-1)[0]),
                 fields: {
-                  Source: wordInput.innerText,
+                  Source: '',
                 },
                 picture: [
                   {
